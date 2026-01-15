@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000', // change if backend runs elsewhere
-  withCredentials: true,            // 🔥 REQUIRED for guestId cookie
+  baseURL: 'http://localhost:3000', // backend URL
+  withCredentials: true,            // REQUIRED for guestId cookie
 })
 
 api.interceptors.request.use(
@@ -11,6 +11,8 @@ api.interceptors.request.use(
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    } else {
+      delete config.headers.Authorization
     }
 
     return config

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../auth/AuthContext'
 
 const Deals = () => {
+  const { token , role  } = useAuth()
   return (
     <div className="min-h-screen bg-gray-100">
      
@@ -60,22 +62,45 @@ const Deals = () => {
       </section>
 
         {/* Call to Action */}
-      <section className="bg-white border-t">
-        <div className="max-w-6xl mx-auto px-4 py-12 text-center">
-          <h2 className="text-2xl font-semibold mb-3">
-            Start Shopping with SuperMart
-          </h2>
-          <p className="text-gray-600 mb-5">
-            Login or create an account to explore our products.
-          </p>
+      <section className="bg-white border-t mx-auto px-4 py-16 text-center">
+         {!token && (
+  // PUBLIC
+  <div className="border pb-8">
+    <h2 className="text-2xl font-semibold mt-5 mb-3">
+      Start Shopping with SuperMart
+    </h2>
+    <p className="text-gray-600 mb-5">
+      Login or create an account to explore our products.
+    </p>
 
-          <Link
-            to="/register"
-            className="bg-black text-white px-8 py-2 rounded-lg"
-          >
-            Get Started
-          </Link>
-        </div>
+    <Link
+      to="/register"
+      className="bg-black text-white px-8 py-2 rounded-lg"
+    >
+      Get Started
+    </Link>
+  </div>
+)}
+
+{token && role === 'USER' && (
+  // USER
+  <div className="border pb-8">
+    <h2 className="text-2xl font-semibold mt-5 mb-3">
+      Welcome back 👋
+    </h2>
+    <p className="text-gray-600 mb-5">
+      Start adding items to your cart.
+    </p>
+
+    <Link
+      to="/products"
+      className="bg-green-600 text-white px-8 py-2 rounded-lg"
+    >
+      Shop Now
+    </Link>
+  </div>
+)}
+
       </section>
 
       

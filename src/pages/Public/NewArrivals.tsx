@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 
 const NewArrivals = () => {
   return (
@@ -59,24 +58,7 @@ const NewArrivals = () => {
         </div>
       </section>
 
-        {/* Call to Action */}
-      <section className="bg-white border-t">
-        <div className="max-w-6xl mx-auto px-4 py-12 text-center">
-          <h2 className="text-2xl font-semibold mb-3">
-            Start Shopping with SuperMart
-          </h2>
-          <p className="text-gray-600 mb-5">
-            Login or create an account to explore our products.
-          </p>
-
-          <Link
-            to="/register"
-            className="bg-black text-white px-8 py-2 rounded-lg"
-          >
-            Get Started
-          </Link>
-        </div>
-      </section>
+     
 
       
     </div>

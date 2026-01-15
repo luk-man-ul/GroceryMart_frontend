@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import api from '../api/axios'
 import type { CartItem } from '../types'
+import { useAuth } from '../auth/AuthContext'
 
 type CartContextType = {
   items: CartItem[]
@@ -11,7 +12,9 @@ const CartContext = createContext<CartContextType | null>(null)
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([])
-  const requestIdRef = useRef(0) // 🔒 prevents race conditions
+  const requestIdRef = useRef(0)
+
+  const { token, authReady } = useAuth()
 
   const refreshCart = async () => {
     const requestId = ++requestIdRef.current
@@ -19,20 +22,22 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const res = await api.get('/cart')
 
-      // ❗ only apply the latest response
       if (requestId === requestIdRef.current) {
         setItems(res.data?.items ?? [])
       }
-    } catch (err) {
+    } catch {
       if (requestId === requestIdRef.current) {
         setItems([])
       }
     }
   }
 
+  // 🔑 THIS is the fix: react ONLY to auth changes
   useEffect(() => {
+    if (!authReady) return
+
     refreshCart()
-  }, [])
+  }, [token, authReady])
 
   return (
     <CartContext.Provider value={{ items, refreshCart }}>

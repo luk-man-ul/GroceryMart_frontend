@@ -5,7 +5,8 @@ import api from '../api/axios'
 interface AuthContextType {
   token: string | null
   role: UserRole | null
-  login: (token: string) => void
+  authReady: boolean
+  login: (token: string) => Promise<void>
   logout: () => void
 }
 
@@ -14,38 +15,49 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null)
   const [role, setRole] = useState<UserRole | null>(null)
+  const [authReady, setAuthReady] = useState(false)
 
+  // 🔁 Restore auth on app load
   useEffect(() => {
     const storedToken = localStorage.getItem('token')
+
     if (storedToken) {
       setToken(storedToken)
       const payload = JSON.parse(atob(storedToken.split('.')[1])) as JwtPayload
       setRole(payload.role)
     }
+
+    setAuthReady(true)
   }, [])
 
- const login = async (jwt: string) => {
-  localStorage.setItem('token', jwt)
-  setToken(jwt)
+  // 🔐 LOGIN
+  const login = async (jwt: string) => {
+    localStorage.setItem('token', jwt)
+    setToken(jwt)
 
-  const payload = JSON.parse(atob(jwt.split('.')[1])) as JwtPayload
-  setRole(payload.role)
+    const payload = JSON.parse(atob(jwt.split('.')[1])) as JwtPayload
+    setRole(payload.role)
 
-  try {
-    await api.post('/cart/merge')
-  } catch (err) {
-    console.error('Cart merge failed', err)
+    // merge guest cart → user cart
+    try {
+      await api.post('/cart/merge')
+    } catch (err) {
+      console.error('Cart merge failed', err)
+    }
   }
-}
 
+  // 🚪 LOGOUT
   const logout = () => {
     localStorage.removeItem('token')
     setToken(null)
     setRole(null)
+    // guest cart will be picked automatically via cookie
   }
 
   return (
-    <AuthContext.Provider value={{ token, role, login, logout }}>
+    <AuthContext.Provider
+      value={{ token, role, authReady, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   )

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+
 
 const AboutUs = () => {
   return (
@@ -66,15 +66,10 @@ const AboutUs = () => {
             Start Shopping with SuperMart
           </h2>
           <p className="text-gray-600 mb-5">
-            Login or create an account to explore our products.
+        Join us and explore our products.
           </p>
 
-          <Link
-            to="/register"
-            className="bg-black text-white px-8 py-2 rounded-lg"
-          >
-            Get Started
-          </Link>
+          
         </div>
       </section>
 
