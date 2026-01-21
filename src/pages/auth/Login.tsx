@@ -9,9 +9,9 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { refreshCart } = useCart()
 
   const { login } = useAuth()
+  const { refreshCart } = useCart()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,10 +20,34 @@ const Login = () => {
     setLoading(true)
 
     try {
-      const res = await api.post('/auth/login', { email, password })
-      login(res.data.access_token)
-      await refreshCart()
-      navigate('/')
+      const res = await api.post('/auth/login', {
+        email,
+        password,
+      })
+
+      const token = res.data.access_token
+
+      // 🔐 Save token + role in AuthContext
+      await login(token)
+
+      // 🎭 Decode role
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const role = payload.role
+
+      // 🚦 ROLE-BASED REDIRECT (REPLACE HISTORY)
+      if (role === 'ADMIN') {
+        navigate('/admin', { replace: true })
+      } else if (role === 'SHOP_STAFF') {
+        navigate('/staff/billing', { replace: true })
+      } else if (role === 'INVENTORY_STAFF') {
+        navigate('/staff/inventory', { replace: true })
+      } else if (role === 'DELIVERY_STAFF') {
+        navigate('/staff/delivery', { replace: true })
+      } else {
+        // USER
+        await refreshCart()
+        navigate('/', { replace: true })
+      }
     } catch {
       setError('Invalid email or password')
     } finally {
@@ -53,7 +77,7 @@ const Login = () => {
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="you@example.com"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -65,7 +89,7 @@ const Login = () => {
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="••••••••"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
@@ -77,15 +101,20 @@ const Login = () => {
           </button>
         </form>
 
-        {/* Links */}
         <div className="mt-6 text-sm text-center space-y-2">
-          <Link to="/forgot-password" className="text-blue-600 hover:underline">
+          <Link
+            to="/forgot-password"
+            className="text-blue-600 hover:underline"
+          >
             Forgot password?
           </Link>
 
           <p className="text-gray-600">
             Don’t have an account?{' '}
-            <Link to="/register" className="text-blue-600 hover:underline">
+            <Link
+              to="/register"
+              className="text-blue-600 hover:underline"
+            >
               Sign up
             </Link>
           </p>

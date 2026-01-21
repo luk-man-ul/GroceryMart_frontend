@@ -1,4 +1,10 @@
-export type UserRole = 'USER' | 'ADMIN'
+export type UserRole =
+  | 'USER'
+  | 'ADMIN'
+  | 'SHOP_STAFF'
+  | 'DELIVERY_STAFF'
+  | 'INVENTORY_STAFF'
+
 
 export interface JwtPayload {
   sub: number

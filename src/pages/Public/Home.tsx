@@ -4,9 +4,19 @@ import { useAuth } from '../../auth/AuthContext'
 const Home = () => {
   const { token, role } = useAuth()
 
-  //ADMIN: dashboard is home
-  if (token && role === 'ADMIN') {
-    return <Navigate to="/admin" replace />
+  // 🔐 ROLE-BASED HOME REDIRECT
+  if (token) {
+    if (role === 'ADMIN') {
+      return <Navigate to="/admin" replace />
+    }
+
+    if (
+      role === 'SHOP_STAFF' ||
+      role === 'DELIVERY_STAFF' ||
+      role === 'INVENTORY_STAFF'
+    ) {
+      return <Navigate to="/staff" replace />
+    }
   }
 
   return (
@@ -17,77 +27,58 @@ const Home = () => {
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
             Fresh Groceries Delivered to Your Doorstep
           </h1>
+
           <p className="text-gray-600 max-w-xl mx-auto mb-6">
             Shop daily essentials, groceries, and household items at the
             best prices from your trusted supermarket.
           </p>
+
+          {/* PUBLIC */}
           {!token && (
-  // PUBLIC
-  <div className="border pb-8">
-    <h2 className="text-2xl font-semibold mt-5 mb-3">
-      Start Shopping with SuperMart
-    </h2>
-    <p className="text-gray-600 mb-5">
-      Login or create an account to explore our products.
-    </p>
+            <div className="border pb-8">
+              <h2 className="text-2xl font-semibold mt-5 mb-3">
+                Start Shopping with SuperMart
+              </h2>
+              <p className="text-gray-600 mb-5">
+                Login or create an account to explore our products.
+              </p>
 
-    <Link
-      to="/register"
-      className="bg-black text-white px-8 py-2 rounded-lg"
-    >
-      Get Started
-    </Link>
-  </div>
-)}
+              <Link
+                to="/register"
+                className="bg-black text-white px-8 py-2 rounded-lg"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
 
-{token && role === 'USER' && (
-  // USER
-  <div className="border pb-8">
-    <h2 className="text-2xl font-semibold mt-5 mb-3">
-      Welcome back 👋
-    </h2>
-    <p className="text-gray-600 mb-5">
-      Start adding items to your cart.
-    </p>
+          {/* USER */}
+          {token && role === 'USER' && (
+            <div className="border pb-8">
+              <h2 className="text-2xl font-semibold mt-5 mb-3">
+                Welcome back 👋
+              </h2>
+              <p className="text-gray-600 mb-5">
+                Start adding items to your cart.
+              </p>
 
-    <Link
-      to="/products"
-      className="bg-green-600 text-white px-8 py-2 rounded-lg"
-    >
-      Shop Now
-    </Link>
-  </div>
-)}
-
-{token && role === 'ADMIN' && (
-  // ADMIN
-  <div className="border pb-8">
-    <h2 className="text-2xl font-semibold mt-5 mb-3">
-      Admin Dashboard
-    </h2>
-    <p className="text-gray-600 mb-5">
-      Manage products, orders, and users.
-    </p>
-
-    <Link
-      to="/admin"
-      className="bg-blue-600 text-white px-8 py-2 rounded-lg"
-    >
-      Go to Dashboard
-    </Link>
-  </div>
-)}
-
-
+              <Link
+                to="/products"
+                className="bg-green-600 text-white px-8 py-2 rounded-lg"
+              >
+                Shop Now
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
-      <section></section>
-
       {/* Features */}
-      <h1 className="text-2xl font-semibold mt-6 mb-0 text-center">Trusted Services</h1>
+      <h1 className="text-2xl font-semibold mt-6 mb-0 text-center">
+        Trusted Services
+      </h1>
+
       <section className="max-w-6xl mx-auto px-4 py-12">
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl p-6 shadow-sm">
             <h3 className="font-semibold mb-2">🛒 Wide Product Range</h3>
@@ -111,7 +102,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
     </div>
   )
 }
