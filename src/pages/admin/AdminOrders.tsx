@@ -24,251 +24,190 @@ interface Order {
   deliveryStaff?: {
     id: number
     name: string
-    email: string
   } | null
   items: OrderItem[]
 }
 
-
 interface Staff {
   id: number
   name: string
-  role: 'DELIVERY_STAFF' | 'SHOP_STAFF' | 'INVENTORY_STAFF'
+  role: 'DELIVERY_STAFF'
   isActive: boolean
+}
+
+const statusConfig = {
+  PLACED: {
+    label: 'Order Placed',
+    bg: 'bg-blue-50',
+    text: 'text-blue-600',
+    border: 'border-blue-500',
+  },
+  PROCESSING: {
+    label: 'Delivering',
+    bg: 'bg-orange-50',
+    text: 'text-orange-600',
+    border: 'border-orange-500',
+  },
+  DELIVERED: {
+    label: 'Completed',
+    bg: 'bg-green-50',
+    text: 'text-green-600',
+    border: 'border-green-500',
+  },
 }
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
-  const [loading, setLoading] = useState(false)
   const [assigning, setAssigning] = useState<number | null>(null)
 
-  // =========================
-  // FETCH ORDERS
-  // =========================
-  const fetchOrders = async () => {
-    try {
-      setLoading(true)
-      const res = await api.get('/orders')
-      setOrders(res.data)
-    } catch (err) {
-      console.error('Failed to fetch orders', err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // =========================
-  // FETCH DELIVERY STAFF
-  // =========================
-  const fetchStaff = async () => {
-    try {
-      const res = await api.get('/admin/staff')
+  useEffect(() => {
+    api.get('/orders').then(res => setOrders(res.data))
+    api.get('/admin/staff').then(res =>
       setStaff(
         res.data.filter(
-          (s: Staff) =>
-            s.role === 'DELIVERY_STAFF' && s.isActive,
+          (s: Staff) => s.role === 'DELIVERY_STAFF' && s.isActive,
         ),
-      )
-    } catch (err) {
-      console.error('Failed to fetch staff', err)
-    }
-  }
-
-  useEffect(() => {
-    fetchOrders()
-    fetchStaff()
-  }, [])
-
-  // =========================
-  // UPDATE ORDER STATUS
-  // =========================
-  // const updateStatus = async (
-  //   orderId: number,
-  //   status: OrderStatus,
-  // ) => {
-  //   try {
-  //     await api.patch(
-  //       `/orders/${orderId}/status/${status}`,
-  //     )
-  //     setOrders(prev =>
-  //       prev.map(o =>
-  //         o.id === orderId ? { ...o, status } : o,
-  //       ),
-  //     )
-  //   } catch (err) {
-  //     console.error('Status update failed', err)
-  //   }
-  // }
-
-  // =========================
-  // ASSIGN DELIVERY STAFF
-  // =========================
- const assignDeliveryStaff = async (
-  orderId: number,
-  staffId: number,
-) => {
-  try {
-    setAssigning(orderId)
-
-    await api.patch(
-      `/orders/${orderId}/assign-delivery/${staffId}`,
-    )
-
-    const assignedStaff = staff.find(
-      s => s.id === staffId,
-    )
-
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === orderId
-          ? {
-              ...o,
-              status: 'PROCESSING',
-              deliveryStaff: assignedStaff
-                ? {
-                    id: assignedStaff.id,
-                    name: assignedStaff.name,
-                    email: '',
-                  }
-                : null,
-            }
-          : o,
       ),
     )
-  } catch (err) {
-    console.error('Assignment failed', err)
-    alert('Failed to assign delivery staff')
-  } finally {
-    setAssigning(null)
-  }
-}
+  }, [])
 
+  const assignDeliveryStaff = async (
+    orderId: number,
+    staffId: number,
+  ) => {
+    try {
+      setAssigning(orderId)
+      await api.patch(
+        `/orders/${orderId}/assign-delivery/${staffId}`,
+      )
+
+      const staffMember = staff.find(s => s.id === staffId)
+
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                status: 'PROCESSING',
+                deliveryStaff: staffMember
+                  ? { id: staffMember.id, name: staffMember.name }
+                  : null,
+              }
+            : o,
+        ),
+      )
+    } finally {
+      setAssigning(null)
+    }
+  }
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold mb-6">
+      <h1 className="text-3xl font-bold mb-6">
         Orders
       </h1>
 
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div className="space-y-6">
-          {orders.map(order => (
+      {/* GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {orders.map(order => {
+          const status = statusConfig[order.status]
+
+          return (
             <div
               key={order.id}
-              className="bg-white p-6 rounded shadow"
+              className="bg-white rounded-2xl border shadow-sm p-5 flex flex-col transition-all duration-300 ease-in-out
+               hover:shadow-xl hover:-translate-y-1 hover:border-blue-400"
             >
               {/* HEADER */}
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="font-semibold">
-                    Order #{order.id}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {order.user.name} — {order.user.email}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(
-                      order.createdAt,
-                    ).toLocaleString()}
-                  </p>
-                </div>
+              <div className="text-left mb-4">
+                <h2 className="text-lg font-semibold">
+                  Order #{order.id}
+                </h2>
+                <p className="text-sm text-gray-500">
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
+              </div>
 
-               {/* STATUS (READ-ONLY FOR ADMIN) */}
-<div className="text-sm font-medium px-3 py-1 rounded bg-gray-100">
-  Status: {order.status}
-</div>
-</div>
+              {/* CUSTOMER */}
+              <div className="text-sm text-gray-600 mb-3">
+                <p className="font-medium">{order.user.name}</p>
+                <p>{order.user.email}</p>
+              </div>
 
-{/* DELIVERY ASSIGNMENT */}
-{order.status === 'PLACED' && !order.deliveryStaff ? (
-  <div className="mb-3">
-    <select
-      defaultValue=""
-      disabled={assigning === order.id}
-      onChange={e =>
-        assignDeliveryStaff(
-          order.id,
-          Number(e.target.value),
-        )
-      }
-      className="border p-2 rounded text-sm"
-    >
-      <option value="" disabled>
-        Assign delivery staff
-      </option>
-
-      {staff.map(s => (
-        <option key={s.id} value={s.id}>
-          {s.name}
-        </option>
-      ))}
-    </select>
-  </div>
-) : order.deliveryStaff ? (
-  <p className="text-sm text-green-700 mb-3">
-    Assigned to:{' '}
-    <span className="font-medium">
-      {order.deliveryStaff.name}
-    </span>
-  </p>
-) : (
-  <p className="text-sm text-gray-500 mb-3">
-    Assignment locked
-  </p>
-)}
+              <hr className="my-3" />
 
               {/* ITEMS */}
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-2 text-left">
-                      Product
-                    </th>
-                    <th className="p-2 text-left">
-                      Qty
-                    </th>
-                    <th className="p-2 text-left">
-                      Price
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map(item => (
-                    <tr
-                      key={item.id}
-                      className="border-t"
-                    >
-                      <td className="p-2">
-                        {item.product.name}
-                      </td>
-                      <td className="p-2">
-                        {item.quantity}
-                      </td>
-                      <td className="p-2">
-                        ₹{item.price}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="flex-1 space-y-3">
+                <p className="font-semibold text-gray-700">
+                  Order Menu
+                </p>
+
+                {order.items.map(item => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between text-sm"
+                  >
+                    <span>
+                      {item.product.name} × {item.quantity}
+                    </span>
+                    <span className="font-medium">
+                      ₹{item.price}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="my-3" />
 
               {/* TOTAL */}
-              <div className="text-right font-semibold mt-4">
-                Total: ₹{order.totalPrice}
+              <div className="flex justify-between font-semibold text-lg">
+                <span>Total</span>
+                <span>₹{order.totalPrice}</span>
+              </div>
+
+              {/* DELIVERY STAFF */}
+              <div className="mt-4">
+                {order.status === 'PLACED' ? (
+                  <select
+                    defaultValue=""
+                    disabled={assigning === order.id}
+                    onChange={e =>
+                      assignDeliveryStaff(
+                        order.id,
+                        Number(e.target.value),
+                      )
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="" disabled>
+                      Assign delivery staff
+                    </option>
+                    {staff.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                ) : order.deliveryStaff ? (
+                  <p className="text-sm text-green-600 font-medium">
+                    Assigned to {order.deliveryStaff.name}
+                  </p>
+                ) : null}
+              </div>
+
+              {/* STATUS BUTTON */}
+              <div
+                className={`mt-5 text-center py-3 rounded-xl border
+    transition-all duration-300 cursor-pointer
+    ${status.bg} ${status.text} ${status.border}`}
+              >
+                {status.label}
               </div>
             </div>
-          ))}
-
-          {orders.length === 0 && (
-            <p className="text-gray-500">
-              No orders found
-            </p>
-          )}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </div>
   )
 }
