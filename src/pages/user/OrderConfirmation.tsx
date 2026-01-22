@@ -15,6 +15,8 @@ type Order = {
   totalPrice: number
   status: string
   createdAt: string
+  phone?: string | null
+  address?: string | null
   items: OrderItem[]
 }
 
@@ -26,18 +28,21 @@ const OrderConfirmation = () => {
     api
       .get<Order[]>('/orders/my')
       .then(res => {
-        // latest order = first item (sorted desc in backend)
         setOrder(res.data[0])
       })
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <p className="p-4">Loading order...</p>
+  if (loading) {
+    return <p className="p-4">Loading order...</p>
+  }
 
   if (!order) {
     return (
       <div className="p-4 text-center">
-        <h2 className="text-xl font-bold">No orders found</h2>
+        <h2 className="text-xl font-bold">
+          No orders found
+        </h2>
       </div>
     )
   }
@@ -48,16 +53,38 @@ const OrderConfirmation = () => {
         Order Confirmed 🎉
       </h1>
 
-      <div className="border rounded-lg p-4 mb-6 bg-white">
-        <p><strong>Order ID:</strong> #{order.id}</p>
-        <p><strong>Status:</strong> {order.status}</p>
+      {/* ORDER META */}
+      <div className="border rounded-lg p-4 mb-6 bg-white space-y-2">
+        <p>
+          <strong>Order ID:</strong> #{order.id}
+        </p>
+
+        <p>
+          <strong>Status:</strong> {order.status}
+        </p>
+
         <p>
           <strong>Date:</strong>{' '}
           {new Date(order.createdAt).toLocaleString()}
         </p>
+
+        <hr className="my-2" />
+
+        {/* DELIVERY INFO */}
+        <p>
+          <strong>Phone:</strong>{' '}
+          {order.phone ?? 'Not provided'}
+        </p>
+
+        <p>
+          <strong>Delivery Address:</strong>{' '}
+          {order.address ?? 'Not provided'}
+        </p>
       </div>
 
-      <h2 className="text-lg font-semibold mb-3">Order Summary</h2>
+      <h2 className="text-lg font-semibold mb-3">
+        Order Summary
+      </h2>
 
       <div className="space-y-4">
         {order.items.map((item, index) => (
@@ -66,7 +93,9 @@ const OrderConfirmation = () => {
             className="flex justify-between items-center border-b pb-2"
           >
             <div>
-              <p className="font-medium">{item.product.name}</p>
+              <p className="font-medium">
+                {item.product.name}
+              </p>
               <p className="text-sm text-gray-600">
                 Quantity: {item.quantity}
               </p>
@@ -75,7 +104,8 @@ const OrderConfirmation = () => {
             <div className="text-right">
               <p>₹ {item.price}</p>
               <p className="text-sm text-gray-600">
-                Subtotal: ₹ {item.price * item.quantity}
+                Subtotal: ₹{' '}
+                {item.price * item.quantity}
               </p>
             </div>
           </div>

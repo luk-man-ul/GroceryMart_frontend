@@ -52,10 +52,15 @@ export type DeliveryStatus =
   | 'PROCESSING'
   | 'DELIVERED'
 
-export interface DeliveryOrder {
+export type DeliveryOrder = {
   id: number
   customerName: string
-  address: string
+
+  // ✅ NEW (from Order snapshot)
+  phone: string | null
+  address: string | null
+
   totalAmount: number
   status: DeliveryStatus
 }
+

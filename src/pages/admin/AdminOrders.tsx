@@ -17,18 +17,23 @@ interface Order {
   totalPrice: number
   status: OrderStatus
   createdAt: string
+
+  phone?: string | null
+  address?: string | null
+
   user: {
     name: string
     email: string
   }
+
   deliveryStaff?: {
     id: number
     name: string
     email: string
   } | null
+
   items: OrderItem[]
 }
-
 
 interface Staff {
   id: number
@@ -81,69 +86,47 @@ const AdminOrders = () => {
   }, [])
 
   // =========================
-  // UPDATE ORDER STATUS
-  // =========================
-  // const updateStatus = async (
-  //   orderId: number,
-  //   status: OrderStatus,
-  // ) => {
-  //   try {
-  //     await api.patch(
-  //       `/orders/${orderId}/status/${status}`,
-  //     )
-  //     setOrders(prev =>
-  //       prev.map(o =>
-  //         o.id === orderId ? { ...o, status } : o,
-  //       ),
-  //     )
-  //   } catch (err) {
-  //     console.error('Status update failed', err)
-  //   }
-  // }
-
-  // =========================
   // ASSIGN DELIVERY STAFF
   // =========================
- const assignDeliveryStaff = async (
-  orderId: number,
-  staffId: number,
-) => {
-  try {
-    setAssigning(orderId)
+  const assignDeliveryStaff = async (
+    orderId: number,
+    staffId: number,
+  ) => {
+    try {
+      setAssigning(orderId)
 
-    await api.patch(
-      `/orders/${orderId}/assign-delivery/${staffId}`,
-    )
+      await api.patch(
+        `/orders/${orderId}/assign-delivery/${staffId}`,
+      )
 
-    const assignedStaff = staff.find(
-      s => s.id === staffId,
-    )
+      const assignedStaff = staff.find(
+        s => s.id === staffId,
+      )
 
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === orderId
-          ? {
-              ...o,
-              status: 'PROCESSING',
-              deliveryStaff: assignedStaff
-                ? {
-                    id: assignedStaff.id,
-                    name: assignedStaff.name,
-                    email: '',
-                  }
-                : null,
-            }
-          : o,
-      ),
-    )
-  } catch (err) {
-    console.error('Assignment failed', err)
-    alert('Failed to assign delivery staff')
-  } finally {
-    setAssigning(null)
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                status: 'PROCESSING',
+                deliveryStaff: assignedStaff
+                  ? {
+                      id: assignedStaff.id,
+                      name: assignedStaff.name,
+                      email: '',
+                    }
+                  : null,
+              }
+            : o,
+        ),
+      )
+    } catch (err) {
+      console.error('Assignment failed', err)
+      alert('Failed to assign delivery staff')
+    } finally {
+      setAssigning(null)
+    }
   }
-}
-
 
   return (
     <div>
@@ -161,64 +144,82 @@ const AdminOrders = () => {
               className="bg-white p-6 rounded shadow"
             >
               {/* HEADER */}
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <p className="font-semibold">
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-1 text-sm">
+                  <p className="font-semibold text-base">
                     Order #{order.id}
                   </p>
-                  <p className="text-sm text-gray-600">
+
+                  <p className="text-gray-600">
                     {order.user.name} — {order.user.email}
                   </p>
-                  <p className="text-sm text-gray-500">
+
+                  <p className="text-gray-500">
                     {new Date(
                       order.createdAt,
                     ).toLocaleString()}
                   </p>
+
+                  <div className="pt-2">
+                    <p>
+                      <strong>Phone:</strong>{' '}
+                      {order.phone ?? 'Not provided'}
+                    </p>
+
+                    <p>
+                      <strong>Address:</strong>{' '}
+                      {order.address ?? 'Not provided'}
+                    </p>
+                  </div>
                 </div>
 
-               {/* STATUS (READ-ONLY FOR ADMIN) */}
-<div className="text-sm font-medium px-3 py-1 rounded bg-gray-100">
-  Status: {order.status}
-</div>
-</div>
+                {/* STATUS */}
+                <div className="text-sm font-medium px-3 py-1 rounded bg-gray-100">
+                  Status: {order.status}
+                </div>
+              </div>
 
-{/* DELIVERY ASSIGNMENT */}
-{order.status === 'PLACED' && !order.deliveryStaff ? (
-  <div className="mb-3">
-    <select
-      defaultValue=""
-      disabled={assigning === order.id}
-      onChange={e =>
-        assignDeliveryStaff(
-          order.id,
-          Number(e.target.value),
-        )
-      }
-      className="border p-2 rounded text-sm"
-    >
-      <option value="" disabled>
-        Assign delivery staff
-      </option>
+              {/* DELIVERY ASSIGNMENT */}
+              {order.status === 'PLACED' &&
+              !order.deliveryStaff ? (
+                <div className="mb-3">
+                  <select
+                    defaultValue=""
+                    disabled={assigning === order.id}
+                    onChange={e =>
+                      assignDeliveryStaff(
+                        order.id,
+                        Number(e.target.value),
+                      )
+                    }
+                    className="border p-2 rounded text-sm"
+                  >
+                    <option value="" disabled>
+                      Assign delivery staff
+                    </option>
 
-      {staff.map(s => (
-        <option key={s.id} value={s.id}>
-          {s.name}
-        </option>
-      ))}
-    </select>
-  </div>
-) : order.deliveryStaff ? (
-  <p className="text-sm text-green-700 mb-3">
-    Assigned to:{' '}
-    <span className="font-medium">
-      {order.deliveryStaff.name}
-    </span>
-  </p>
-) : (
-  <p className="text-sm text-gray-500 mb-3">
-    Assignment locked
-  </p>
-)}
+                    {staff.map(s => (
+                      <option
+                        key={s.id}
+                        value={s.id}
+                      >
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : order.deliveryStaff ? (
+                <p className="text-sm text-green-700 mb-3">
+                  Assigned to:{' '}
+                  <span className="font-medium">
+                    {order.deliveryStaff.name}
+                  </span>
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 mb-3">
+                  Assignment locked
+                </p>
+              )}
 
               {/* ITEMS */}
               <table className="w-full text-sm">
@@ -255,7 +256,6 @@ const AdminOrders = () => {
                 </tbody>
               </table>
 
-              {/* TOTAL */}
               <div className="text-right font-semibold mt-4">
                 Total: ₹{order.totalPrice}
               </div>

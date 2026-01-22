@@ -10,7 +10,12 @@ const Cart = () => {
   const { token } = useAuth()
   const isAuthenticated = !!token
   const navigate = useNavigate()
+
   const [showConfirm, setShowConfirm] = useState(false)
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const handleDecrease = async (item: CartItem) => {
     try {
@@ -55,16 +60,39 @@ const Cart = () => {
 
   const total = items.reduce(
     (sum, item) => sum + item.quantity * item.product.price,
-    0
+    0,
   )
 
   const placeOrder = async () => {
+    if (submitting) return
+
+    setError('')
+
+    if (phone.trim().length < 10) {
+      setError('Please enter a valid phone number')
+      return
+    }
+
+    if (address.trim().length < 10) {
+      setError('Please enter a valid delivery address')
+      return
+    }
+
     try {
-      await api.post('/orders')
+      setSubmitting(true)
+
+      await api.post('/orders', {
+        phone,
+        address,
+      })
+
       await refreshCart()
+      setShowConfirm(false)
       navigate('/order-success')
     } catch (err: any) {
-      alert(err?.response?.data?.message ?? 'Order failed')
+      setError(err?.response?.data?.message ?? 'Order failed')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -88,14 +116,12 @@ const Cart = () => {
             key={item.id}
             className="flex items-center justify-between bg-white rounded-xl shadow-sm p-4"
           >
-            {/* Left */}
             <div className="flex items-center gap-4">
               <img
                 src={item.product.image}
                 alt={item.product.name}
                 className="w-20 h-20 object-contain bg-gray-50 rounded-lg"
               />
-
               <div>
                 <h3 className="font-semibold">{item.product.name}</h3>
                 <p className="text-sm text-gray-500">
@@ -104,9 +130,7 @@ const Cart = () => {
               </div>
             </div>
 
-            {/* Right */}
             <div className="flex items-center gap-4">
-              {/* Quantity */}
               <div className="flex items-center border rounded-lg overflow-hidden">
                 <button
                   onClick={() => handleDecrease(item)}
@@ -127,7 +151,6 @@ const Cart = () => {
                 </button>
               </div>
 
-              {/* Remove */}
               <button
                 onClick={() => removeItem(item)}
                 className="text-red-500 hover:text-red-700 text-lg"
@@ -149,7 +172,7 @@ const Cart = () => {
       {isAuthenticated ? (
         <button
           onClick={() => setShowConfirm(true)}
-          className="mt-6 w-full bg-black text-white py-3 rounded-xl text-lg hover:bg-gray-900 transition"
+          className="mt-6 w-full bg-black text-white py-3 rounded-xl text-lg"
         >
           Place Order
         </button>
@@ -164,35 +187,50 @@ const Cart = () => {
 
       {/* CONFIRM MODAL */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 say bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl w-[90%] max-w-md shadow-xl overflow-hidden">
             <div className="bg-green-600 px-6 py-4">
               <h2 className="text-white text-lg font-semibold">
-                Confirm Order
+                Delivery Details
               </h2>
             </div>
 
-            <div className="px-6 py-5">
-              <p className="text-gray-700 mb-4">
-                Are you sure you want to place this order?
-              </p>
+            <div className="px-6 py-5 space-y-4">
+              <input
+                type="text"
+                placeholder="Phone number"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              <textarea
+                placeholder="Delivery address"
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+                className="w-full border p-2 rounded"
+                rows={3}
+              />
+
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
 
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="px-5 py-2 rounded border text-gray-700 hover:bg-gray-100"
+                  className="px-5 py-2 rounded border"
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
 
                 <button
-                  onClick={async () => {
-                    setShowConfirm(false)
-                    await placeOrder()
-                  }}
-                  className="px-5 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+                  onClick={placeOrder}
+                  disabled={submitting}
+                  className="px-5 py-2 rounded bg-green-600 text-white disabled:opacity-60"
                 >
-                  Confirm Order
+                  {submitting ? 'Placing…' : 'Confirm Order'}
                 </button>
               </div>
             </div>

@@ -88,9 +88,7 @@ const EditProduct = () => {
   // =========================
   // SUBMIT
   // =========================
-  const handleSubmit = async (
-    e: React.FormEvent,
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
@@ -131,7 +129,7 @@ const EditProduct = () => {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded shadow max-w-xl space-y-6"
       >
-        {/* PRODUCT INFO */}
+        {/* PRODUCT NAME */}
         <div>
           <label className="block text-sm font-medium mb-1">
             Product Name
@@ -194,6 +192,34 @@ const EditProduct = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* IMAGE URL */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Image URL
+          </label>
+          <input
+            name="image"
+            type="url"
+            placeholder="https://example.com/product.jpg"
+            value={form.image}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
+
+          {/* IMAGE PREVIEW */}
+          {form.image && (
+            <img
+              src={form.image}
+              alt="Product Preview"
+              className="mt-3 h-32 object-contain border rounded"
+              onError={e =>
+                ((e.target as HTMLImageElement).style.display =
+                  'none')
+              }
+            />
+          )}
         </div>
 
         {/* INVENTORY INFO (READ-ONLY) */}
