@@ -1,109 +1,90 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 
+import DealsHero from '../../components/deals/DealsHero'
+import DealCard from '../../components/deals/DealCard'
+import DealsTrust from '../../components/deals/DealsTrust'
+
+import fruits from '../../assets/deals/cards/fruits.jpeg'
+import vegetables from '../../assets/deals/cards/vegetables.jpeg'
+import meat from '../../assets/deals/cards/meat.jpeg'
+import snacks from '../../assets/deals/cards/snacks.jpeg'
+import dairy from '../../assets/deals/cards/dairy.jpeg'
+
 const Deals = () => {
-  const { token , role  } = useAuth()
+  const { token, role } = useAuth()
+
   return (
-    <div className="min-h-screen bg-gray-100">
-     
-{/* Hero Section */}
-      <section className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-           Deals
-          </h1>
-          <p className="text-gray-600 max-w-xl mx-auto mb-6">
-            Page Under Construction
-          </p>
+    <div className="bg-white">
+
+      {/* HERO */}
+      <DealsHero />
+
+      {/* DEALS GRID */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+
+          <h2 className="text-3xl font-bold text-center mb-10">
+            Top Deals for You
+          </h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            <DealCard image={fruits} title="Fresh Fruits" discount="30% OFF" />
+            <DealCard image={vegetables} title="Vegetables" discount="25% OFF" />
+            <DealCard image={meat} title="Meat & Fish" discount="20% OFF" />
+            <DealCard image={snacks} title="Snacks" discount="15% OFF" />
+            <DealCard image={dairy} title="Dairy Products" discount="10% OFF" />
+          </div>
 
         </div>
       </section>
 
-    {/* Features */}
-      <h1 className="text-2xl font-semibold mt-6 mb-0 text-center">Why choose us </h1>
-      <section className="max-w-6xl mx-auto px-4 py-12">
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">🛒 Wide Product Range</h3>
-            <p className="text-sm text-gray-600">
-              Groceries, vegetables, fruits, snacks, and more.
-            </p>
-          </div>
+      {/* TRUST */}
+      <DealsTrust />
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">💰 Best Prices</h3>
-            <p className="text-sm text-gray-600">
-              Affordable pricing with quality products.
-            </p>
-          </div>
+      {/* CTA */}
+      <section className="py-20">
+        <div className="max-w-5xl mx-auto px-6 text-center border rounded-2xl py-14">
 
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">🚚 Fast Delivery</h3>
-            <p className="text-sm text-gray-600">
-              Quick and reliable delivery to your home.
-            </p>
-          </div>
+          {!token && (
+            <>
+              <h2 className="text-2xl font-semibold mb-3">
+                Start Shopping with SuperMart
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Login or create an account to explore our deals.
+              </p>
+
+              <Link
+                to="/register"
+                className="bg-black text-white px-10 py-3 rounded-full"
+              >
+                Get Started
+              </Link>
+            </>
+          )}
+
+          {token && role === 'USER' && (
+            <>
+              <h2 className="text-2xl font-semibold mb-3">
+                Welcome Back 👋
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Check out today’s best deals curated for you.
+              </p>
+
+              <Link
+                to="/products"
+                className="bg-green-600 text-white px-10 py-3 rounded-full"
+              >
+                Shop Now
+              </Link>
+            </>
+          )}
+
         </div>
       </section>
 
- {/* Hero Section */}
-      <section className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Fresh Groceries Delivered to Your Doorstep
-          </h1>
-          <p className="text-gray-600 max-w-xl mx-auto mb-6">
-            Shop daily essentials, groceries, and household items at the
-            best prices from your trusted supermarket.
-          </p>
-
-        </div>
-      </section>
-
-        {/* Call to Action */}
-      <section className="bg-white border-t mx-auto px-4 py-16 text-center">
-         {!token && (
-  // PUBLIC
-  <div className="border pb-8">
-    <h2 className="text-2xl font-semibold mt-5 mb-3">
-      Start Shopping with SuperMart
-    </h2>
-    <p className="text-gray-600 mb-5">
-      Login or create an account to explore our products.
-    </p>
-
-    <Link
-      to="/register"
-      className="bg-black text-white px-8 py-2 rounded-lg"
-    >
-      Get Started
-    </Link>
-  </div>
-)}
-
-{token && role === 'USER' && (
-  // USER
-  <div className="border pb-8">
-    <h2 className="text-2xl font-semibold mt-5 mb-3">
-      Welcome back 👋
-    </h2>
-    <p className="text-gray-600 mb-5">
-      Start adding items to your cart.
-    </p>
-
-    <Link
-      to="/products"
-      className="bg-green-600 text-white px-8 py-2 rounded-lg"
-    >
-      Shop Now
-    </Link>
-  </div>
-)}
-
-      </section>
-
-      
     </div>
   )
 }

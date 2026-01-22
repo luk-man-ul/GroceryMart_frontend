@@ -9,6 +9,10 @@ const Products = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [categoryId, setCategoryId] = useState<number | null>(null)
+
+  // Track which product was added
+  const [addedProductId, setAddedProductId] = useState<number | null>(null)
+
   const { refreshCart } = useCart()
 
   const [searchParams] = useSearchParams()
@@ -29,18 +33,34 @@ const Products = () => {
       .finally(() => setLoading(false))
   }, [search, categoryId])
 
+  const addToCart = async (productId: number) => {
+    try {
+      await api.post('/cart/add', {
+        productId,
+        quantity: 1,
+      })
+
+      await refreshCart()
+      setAddedProductId(productId)
+
+      setTimeout(() => setAddedProductId(null), 2000)
+    } catch {
+      alert('Failed to add to cart')
+    }
+  }
+
   return (
-    <div className="p-4">
-      {/* Header + Filter */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Products</h2>
+    <div className="p-6 max-w-7xl mx-auto">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Products</h2>
         <CategoryDropdown onSelect={setCategoryId} />
       </div>
 
       {loading && <p>Loading...</p>}
 
       {hasNoResults && (
-        <div className="text-center py-10 text-gray-600">
+        <div className="text-center py-16 text-gray-600">
           <p className="text-lg font-semibold">No products found</p>
           <p className="text-sm mt-2">
             Try searching with a different name or remove filters.
@@ -49,7 +69,7 @@ const Products = () => {
       )}
 
       {!hasNoResults && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {products.map(product => {
             const sellingPrice = product.offerPrice ?? product.price
             const discountPercent = product.offerPrice
@@ -59,73 +79,76 @@ const Products = () => {
               : 0
 
             const outOfStock = product.stock <= 0
+            const isAdded = addedProductId === product.id
 
             return (
-              <div key={product.id} className="flex justify-end">
-                <Link
-                  to={`/products/${product.id}`}
-                  className="border rounded-lg p-4 w-70 bg-white hover:shadow transition relative"
-                >
+              <div key={product.id} className="flex justify-center">
+                {/* ✅ CARD (relative is IMPORTANT) */}
+                <div className="relative w-[260px] bg-white rounded-2xl shadow-sm hover:shadow-lg transition p-4">
+
+                  {/* ✅ DISCOUNT BADGE */}
                   {discountPercent > 0 && (
-                    <span className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                    <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs px-3 py-1 rounded-full z-10">
                       {discountPercent}% OFF
                     </span>
                   )}
 
-                  <div className="bg-white border rounded-lg overflow-hidden group">
-                    <img
-                      src={product.image || '/placeholder.png'}
-                      alt={product.name}
-                      className="w-full h-65 object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
-                    />
-                  </div>
+                  {/* IMAGE */}
+                  <Link to={`/products/${product.id}`}>
+                    <div className="bg-gray-50 rounded-xl p-4 h-[180px] flex items-center justify-center">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="max-h-full object-contain"
+                      />
+                    </div>
+                  </Link>
 
-                  <h3 className="mt-2 font-medium text-sm line-clamp-2">
+                  {/* STOCK */}
+                  <p
+                    className={`text-xs text-center mt-3 ${
+                      outOfStock ? 'text-red-600' : 'text-green-600'
+                    }`}
+                  >
+                    {outOfStock ? 'Out of Stock' : 'Available (In Stock)'}
+                  </p>
+
+                  {/* NAME */}
+                  <h3 className="text-sm font-semibold text-center mt-2">
                     {product.name}
                   </h3>
 
-                  <p className="text-xs text-gray-500 mt-1">
-                    {product.stockType}
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-black">
-                      ₹ {sellingPrice}
-                    </span>
-
+                  {/* PRICE */}
+                  <div className="flex justify-center gap-2 mt-2">
+                    <span className="font-bold">₹ {sellingPrice}</span>
                     {product.offerPrice && (
-                      <span className="line-through text-sm text-gray-400">
+                      <span className="line-through text-gray-400">
                         ₹ {product.price}
                       </span>
                     )}
                   </div>
 
+                  {/* ADD TO CART */}
                   <button
                     disabled={outOfStock}
-                    onClick={async e => {
-                      e.preventDefault()
-                      e.stopPropagation()
-
-                      try {
-                        await api.post('/cart/add', {
-                          productId: product.id,
-                          quantity: 1,
-                        })
-                        await refreshCart()
-                        alert('Added to cart')
-                      } catch {
-                        alert('Failed to add to cart')
-                      }
-                    }}
-                    className={`mt-1 w-full py-2 rounded text-sm font-medium transition-all duration-200 ease-in-out ${
-                      outOfStock
-                        ? 'bg-gray-400 text-white cursor-not-allowed'
-                        : 'bg-black text-white hover:bg-gray-800 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0'
-                    }`}
+                    onClick={() => addToCart(product.id)}
+                    className={`mt-4 w-full py-2 rounded-xl font-medium transition
+                      ${
+                        outOfStock
+                          ? 'bg-gray-300 cursor-not-allowed'
+                          : 'bg-black text-white hover:bg-gray-800'
+                      }`}
                   >
-                    {outOfStock ? 'Out of Stock' : 'Add to Cart'}
+                    Add to Cart
                   </button>
-                </Link>
+
+                  {/* SUCCESS MESSAGE */}
+                  {isAdded && (
+                    <p className="mt-2 text-center text-green-600 text-sm font-medium">
+                      ✔ Added to cart
+                    </p>
+                  )}
+                </div>
               </div>
             )
           })}

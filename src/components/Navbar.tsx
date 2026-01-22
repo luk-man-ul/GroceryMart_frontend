@@ -1,251 +1,132 @@
-import { useMemo, useState, useCallback } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
-import {
-  Menu,
-  X,
-  Search,
-  ShoppingCart,
-  MapPin,
-  Phone,
-} from 'lucide-react'
-import { useAuth } from '../auth/AuthContext'
-import { useCart } from '../cart/CartContext'
+import { useState } from "react"
+import { Link, NavLink, useNavigate } from "react-router-dom"
+import { Search, ShoppingCart, MapPin, User } from "lucide-react"
+import { useAuth } from "../auth/AuthContext"
+import { useCart } from "../cart/CartContext"
 
 const Navbar = () => {
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
-
   const { token } = useAuth()
   const { items } = useCart()
+  const [search, setSearch] = useState("")
   const navigate = useNavigate()
 
-  /**
-   * 🛒 Cart count (memoized)
-   */
-  const cartCount = useMemo(
-    () =>
-      items.reduce(
-        (sum, item) => sum + item.quantity,
-        0,
-      ),
-    [items],
+  const cartCount = items.reduce(
+    (sum, item) => sum + item.quantity,
+    0
   )
 
-  /**
-   * 🔍 Handle search submit
-   */
-  const handleSearch = useCallback(() => {
-    if (!search.trim()) return
+  const navItems = [
+    { label: "Home", to: "/" },
+    { label: "All Products", to: "/products" },
+    { label: "Deals", to: "/deals" },
+    { label: "New Arrivals", to: "/new-arrivals" },
+    { label: "About Us", to: "/AboutUs" },
+  ]
 
-    navigate(
-      `/products?search=${encodeURIComponent(
-        search.trim(),
-      )}`,
-    )
-    setOpen(false)
-  }, [search, navigate])
+  if (token) {
+    navItems.push({ label: "My Orders", to: "/orders" })
+  }
 
   return (
-    <header className="w-full">
-      {/* ================= TOP BAR ================= */}
-      <div className="bg-green-700 text-white text-sm px-4 py-2 flex justify-between items-center">
-        <div className="flex items-center gap-2 cursor-pointer">
+    <header className="w-full  bg-gray-100 sticky top-0 z-50">
+      
+      {/* TOP BAR */}
+      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
+        
+        {/* LOGO */}
+        <Link
+          to="/"
+          className="text-3xl font-extrabold tracking-wide text-green-700 hover:scale-105 transition"
+        >
+          Super<span className="text-orange-500">Market</span>
+        </Link>
+
+        {/* DELIVERY */}
+        <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
           <MapPin size={16} />
-          <span>Select Delivery or Pickup Area</span>
+          <span>
+            Delivery to <span className="font-semibold text-gray-800">Your Area</span>
+          </span>
         </div>
 
-        <div className="hidden sm:flex items-center gap-6">
-          <div className="flex items-center gap-1">
-            <Phone size={16} />
-            <span>+91 987654321</span>
-          </div>
+        {/* SEARCH */}
+        <div className="flex-1">
+          <div className="relative max-w-2xl mx-auto">
+            <input
+              type="text"
+              placeholder="Search products"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === "Enter" && search.trim()) {
+                  navigate(`/products?search=${encodeURIComponent(search)}`)
+                }
+              }}
+              className="w-full rounded-full bg-gray-100 px-5 py-3 pr-12 outline-none focus:ring-2 focus:ring-green-500"
+            />
 
-          {!token ? (
-            <Link to="/login" className="hover:underline">
-              Login
-            </Link>
-          ) : (
-            <Link
-              to="/account"
-              className="hover:underline"
+            <button
+              onClick={() => {
+                if (search.trim()) {
+                  navigate(`/products?search=${encodeURIComponent(search)}`)
+                }
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition"
             >
-              My Account
-            </Link>
-          )}
+              <Search size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* ACCOUNT + CART */}
+        <div className="flex items-center gap-6">
+          <Link
+            to={token ? "/account" : "/login"}
+            className="flex items-center gap-1 text-sm text-gray-700 hover:text-green-700 transition"
+          >
+            <User size={18} />
+            <span className="hidden sm:inline">
+              {token ? "Account" : "Login"}
+            </span>
+          </Link>
+
+          <Link
+            to="/cart"
+            className="relative hover:scale-110 transition"
+          >
+            <ShoppingCart size={22} />
+
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-green-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </div>
 
-      {/* ================= MAIN NAVBAR ================= */}
-      <div className="bg-white border-b px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
-          {/* LEFT */}
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Toggle navigation menu"
-              className="md:hidden"
-              onClick={() => setOpen(prev => !prev)}
-            >
-              {open ? <X /> : <Menu />}
-            </button>
-
-            <Link
-              to="/"
-              className="text-xl font-bold text-green-700"
-              onClick={() => setOpen(false)}
-            >
-              Super
-              <span className="text-red-600">
-                Market
-              </span>
-            </Link>
-          </div>
-
-          {/* SEARCH */}
-          <div className="flex-1 sm:flex max-w-2xl">
-            <div className="relative w-full">
-              <label
-                htmlFor="search"
-                className="sr-only"
-              >
-                Search products
-              </label>
-              <input
-                id="search"
-                type="text"
-                placeholder="Search products..."
-                value={search}
-                onChange={e =>
-                  setSearch(e.target.value)
-                }
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    handleSearch()
-                  }
-                }}
-                className="w-full bg-gray-100 rounded-full py-2 px-4 pr-12 outline-none"
-              />
-
-              <button
-                aria-label="Search products"
-                onClick={handleSearch}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-gray-600 text-white rounded-full p-2"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* RIGHT */}
-          <div className="flex items-center gap-4">
-            <Link
-              to="/cart"
-              aria-label="Go to cart"
-              className="relative hover:scale-105 transition"
-            >
-              <ShoppingCart />
-
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-          </div>
-        </div>
-
-        {/* ================= DESKTOP MENU ================= */}
-        <nav className="hidden md:flex mt-4 gap-8 text-sm font-medium">
-          {[
-            ['/', 'Home'],
-            ['/products', 'All Products'],
-            ['/deals', 'Deals'],
-            ['/new-arrivals', 'New Arrivals'],
-            ['/aboutus', 'About Us'],
-          ].map(([path, label]) => (
+      {/* MENU PILLS (LIKE YOUR IMAGE) */}
+      <div>
+        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-center gap-3 flex-wrap">
+          {navItems.map(item => (
             <NavLink
-              key={path}
-              to={path}
+              key={item.to}
+              to={item.to}
               className={({ isActive }) =>
-                isActive
-                  ? 'text-green-700 border-b-2 border-green-700 pb-1'
-                  : 'text-gray-700 hover:text-green-600 transition'
+                `
+                px-4 py-2 rounded-full text-sm font-medium transition
+                ${
+                  isActive
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-700"
+                }
+                `
               }
             >
-              {label}
+              {item.label}
             </NavLink>
           ))}
-
-          {token && (
-            <NavLink
-              to="/orders"
-              className={({ isActive }) =>
-                isActive
-                  ? 'text-green-700 border-b-2 border-green-700 pb-1'
-                  : 'text-gray-700 hover:text-green-600 transition'
-              }
-            >
-              My Orders
-            </NavLink>
-          )}
-        </nav>
-
-        {/* ================= MOBILE MENU ================= */}
-        {open && (
-          <div className="md:hidden mt-4 bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
-            {[
-              ['/', 'Home'],
-              ['/products', 'All Products'],
-              ['/deals', 'Deals'],
-              ['/new-arrivals', 'New Arrivals'],
-              ['/aboutus', 'About Us'],
-            ].map(([path, label]) => (
-              <NavLink
-                key={path}
-                to={path}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  isActive
-                    ? 'block text-green-700 font-semibold'
-                    : 'block hover:text-green-600'
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-
-            {token && (
-              <NavLink
-                to="/orders"
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  isActive
-                    ? 'block text-green-700 font-semibold'
-                    : 'block hover:text-green-600'
-                }
-              >
-                My Orders
-              </NavLink>
-            )}
-
-            {!token ? (
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="block text-center bg-green-700 text-white py-2 rounded-lg"
-              >
-                Login
-              </Link>
-            ) : (
-              <Link
-                to="/account"
-                onClick={() => setOpen(false)}
-                className="block text-center bg-green-700 text-white py-2 rounded-lg"
-              >
-                My Account
-              </Link>
-            )}
-          </div>
-        )}
+        </div>
       </div>
     </header>
   )

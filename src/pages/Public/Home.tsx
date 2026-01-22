@@ -1,6 +1,16 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 
+import heroLeft from '../../assets/home/hero-left.jpeg'
+import heroMain from '../../assets/home/hero-main.jpeg'
+import heroRight from '../../assets/home/hero-right.jpeg'
+
+import freshVeg from '../../assets/home/features/fresh-veg.jpeg'
+import delivery from '../../assets/home/features/delivery.jpeg'
+import family from '../../assets/home/features/family.jpeg'
+import HomePromos from '../../components/home/HomePromos'
+
+
 const Home = () => {
   const { token, role } = useAuth()
 
@@ -21,87 +31,138 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Hero Section */}
-      <section className="bg-white">
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Fresh Groceries Delivered to Your Doorstep
-          </h1>
 
-          <p className="text-gray-600 max-w-xl mx-auto mb-6">
-            Shop daily essentials, groceries, and household items at the
-            best prices from your trusted supermarket.
-          </p>
+      {/* ================= HERO SECTION ================= */}
+      <section className="bg-[#f6f7e7]">
+        <div className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
 
-          {/* PUBLIC */}
-          {!token && (
-            <div className="border pb-8">
-              <h2 className="text-2xl font-semibold mt-5 mb-3">
-                Start Shopping with SuperMart
-              </h2>
-              <p className="text-gray-600 mb-5">
-                Login or create an account to explore our products.
-              </p>
+          {/* LEFT IMAGE */}
+          <div className="hidden md:block">
+            <img
+              src={heroLeft}
+              alt="Fresh Fruits"
+              className="rounded-2xl shadow-md"
+            />
+          </div>
 
+          {/* CENTER CONTENT */}
+          <div className="text-center">
+            <img
+              src={heroMain}
+              alt="Organic Groceries"
+              className="mx-auto mb-6 rounded-2xl shadow-lg max-h-[280px]"
+            />
+
+            <h1 className="text-3xl md:text-4xl font-bold mb-3">
+              Fresh Groceries Delivered to Your Doorstep
+            </h1>
+
+            <p className="text-green-700 font-semibold mb-6">
+              Discover real organic flavors • Up to 30% OFF
+            </p>
+
+            {!token && (
               <Link
                 to="/register"
-                className="bg-black text-white px-8 py-2 rounded-lg"
+                className="inline-block bg-green-700 text-white px-10 py-3 rounded-full hover:bg-green-800 transition"
               >
-                Get Started
+                Get Started →
               </Link>
-            </div>
-          )}
+            )}
 
-          {/* USER */}
-          {token && role === 'USER' && (
-            <div className="border pb-8">
-              <h2 className="text-2xl font-semibold mt-5 mb-3">
-                Welcome back 👋
-              </h2>
-              <p className="text-gray-600 mb-5">
-                Start adding items to your cart.
-              </p>
-
+            {token && role === 'USER' && (
               <Link
                 to="/products"
-                className="bg-green-600 text-white px-8 py-2 rounded-lg"
+                className="inline-block bg-green-700 text-white px-10 py-3 rounded-full hover:bg-green-800 transition"
               >
-                Shop Now
+                Shop Now →
               </Link>
+            )}
+          </div>
+
+          {/* RIGHT IMAGE */}
+          <div className="hidden md:block relative">
+            <img
+              src={heroRight}
+              alt="Special Offer"
+              className="rounded-2xl shadow-md"
+            />
+            <span className="absolute top-4 right-4 bg-red-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+              30% OFF
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= PROMO SECTION ================= */}
+<HomePromos />
+
+      {/* ================= WHY SUPERMART ================= */}
+      <section className="bg-white py-20">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
+
+          {/* LEFT IMAGE */}
+          <div>
+            <img
+              src={freshVeg}
+              alt="Fresh vegetables"
+              className="rounded-2xl shadow-lg"
+            />
+          </div>
+
+          {/* RIGHT CONTENT */}
+          <div>
+            <h2 className="text-3xl font-bold mb-8">
+              Why Customers Love SuperMart
+            </h2>
+
+            <div className="space-y-6">
+
+              <div className="flex gap-5 items-start">
+                <img
+                  src={delivery}
+                  alt="Fast delivery"
+                  className="w-16 h-16 rounded-xl object-cover"
+                />
+                <div>
+                  <h4 className="font-semibold text-lg">Fast & Reliable Delivery</h4>
+                  <p className="text-gray-600 text-sm">
+                    Fresh groceries delivered quickly, safely, and on time.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-5 items-start">
+                <img
+                  src={family}
+                  alt="Trusted families"
+                  className="w-16 h-16 rounded-xl object-cover"
+                />
+                <div>
+                  <h4 className="font-semibold text-lg">Trusted by Families</h4>
+                  <p className="text-gray-600 text-sm">
+                    Thousands of households rely on SuperMart every day.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-5 items-start">
+                <div className="w-16 h-16 flex items-center justify-center bg-green-100 rounded-xl text-2xl">
+                  💰
+                </div>
+                <div>
+                  <h4 className="font-semibold text-lg">Best Prices Guaranteed</h4>
+                  <p className="text-gray-600 text-sm">
+                    Affordable pricing with frequent offers and discounts.
+                  </p>
+                </div>
+              </div>
+
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Features */}
-      <h1 className="text-2xl font-semibold mt-6 mb-0 text-center">
-        Trusted Services
-      </h1>
-
-      <section className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">🛒 Wide Product Range</h3>
-            <p className="text-sm text-gray-600">
-              Groceries, vegetables, fruits, snacks, and more.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">💰 Best Prices</h3>
-            <p className="text-sm text-gray-600">
-              Affordable pricing with quality products.
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold mb-2">🚚 Fast Delivery</h3>
-            <p className="text-sm text-gray-600">
-              Quick and reliable delivery to your home.
-            </p>
           </div>
         </div>
       </section>
+
     </div>
   )
 }
