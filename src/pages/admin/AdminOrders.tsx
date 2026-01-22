@@ -17,14 +17,20 @@ interface Order {
   totalPrice: number
   status: OrderStatus
   createdAt: string
+
+  phone?: string | null
+  address?: string | null
+
   user: {
     name: string
     email: string
   }
+
   deliveryStaff?: {
     id: number
     name: string
   } | null
+
   items: OrderItem[]
 }
 
@@ -72,17 +78,23 @@ const AdminOrders = () => {
     )
   }, [])
 
+  // =========================
+  // ASSIGN DELIVERY STAFF
+  // =========================
   const assignDeliveryStaff = async (
     orderId: number,
     staffId: number,
   ) => {
     try {
       setAssigning(orderId)
+
       await api.patch(
         `/orders/${orderId}/assign-delivery/${staffId}`,
       )
 
-      const staffMember = staff.find(s => s.id === staffId)
+      const assignedStaff = staff.find(
+        s => s.id === staffId,
+      )
 
       setOrders(prev =>
         prev.map(o =>
@@ -90,13 +102,20 @@ const AdminOrders = () => {
             ? {
                 ...o,
                 status: 'PROCESSING',
-                deliveryStaff: staffMember
-                  ? { id: staffMember.id, name: staffMember.name }
+                deliveryStaff: assignedStaff
+                  ? {
+                      id: assignedStaff.id,
+                      name: assignedStaff.name,
+                      email: '',
+                    }
                   : null,
               }
             : o,
         ),
       )
+    } catch (err) {
+      console.error('Assignment failed', err)
+      alert('Failed to assign delivery staff')
     } finally {
       setAssigning(null)
     }
@@ -120,55 +139,45 @@ const AdminOrders = () => {
                hover:shadow-xl hover:-translate-y-1 hover:border-blue-400"
             >
               {/* HEADER */}
-              <div className="text-left mb-4">
-                <h2 className="text-lg font-semibold">
-                  Order #{order.id}
-                </h2>
-                <p className="text-sm text-gray-500">
-                  {new Date(order.createdAt).toLocaleString()}
-                </p>
-              </div>
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-1 text-sm">
+                  <p className="font-semibold text-base">
+                    Order #{order.id}
+                  </p>
 
-              {/* CUSTOMER */}
-              <div className="text-sm text-gray-600 mb-3">
-                <p className="font-medium">{order.user.name}</p>
-                <p>{order.user.email}</p>
-              </div>
+                  <p className="text-gray-600">
+                    {order.user.name} — {order.user.email}
+                  </p>
 
-              <hr className="my-3" />
+                  <p className="text-gray-500">
+                    {new Date(
+                      order.createdAt,
+                    ).toLocaleString()}
+                  </p>
 
-              {/* ITEMS */}
-              <div className="flex-1 space-y-3">
-                <p className="font-semibold text-gray-700">
-                  Order Menu
-                </p>
+                  <div className="pt-2">
+                    <p>
+                      <strong>Phone:</strong>{' '}
+                      {order.phone ?? 'Not provided'}
+                    </p>
 
-                {order.items.map(item => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between text-sm"
-                  >
-                    <span>
-                      {item.product.name} × {item.quantity}
-                    </span>
-                    <span className="font-medium">
-                      ₹{item.price}
-                    </span>
+                    <p>
+                      <strong>Address:</strong>{' '}
+                      {order.address ?? 'Not provided'}
+                    </p>
                   </div>
-                ))}
+                </div>
+
+                {/* STATUS */}
+                <div className="text-sm font-medium px-3 py-1 rounded bg-gray-100">
+                  Status: {order.status}
+                </div>
               </div>
 
-              <hr className="my-3" />
-
-              {/* TOTAL */}
-              <div className="flex justify-between font-semibold text-lg">
-                <span>Total</span>
-                <span>₹{order.totalPrice}</span>
-              </div>
-
-              {/* DELIVERY STAFF */}
-              <div className="mt-4">
-                {order.status === 'PLACED' ? (
+              {/* DELIVERY ASSIGNMENT */}
+              {order.status === 'PLACED' &&
+              !order.deliveryStaff ? (
+                <div className="mb-3">
                   <select
                     defaultValue=""
                     disabled={assigning === order.id}
@@ -178,31 +187,72 @@ const AdminOrders = () => {
                         Number(e.target.value),
                       )
                     }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    className="border p-2 rounded text-sm"
                   >
                     <option value="" disabled>
                       Assign delivery staff
                     </option>
+
                     {staff.map(s => (
-                      <option key={s.id} value={s.id}>
+                      <option
+                        key={s.id}
+                        value={s.id}
+                      >
                         {s.name}
                       </option>
                     ))}
                   </select>
-                ) : order.deliveryStaff ? (
-                  <p className="text-sm text-green-600 font-medium">
-                    Assigned to {order.deliveryStaff.name}
-                  </p>
-                ) : null}
-              </div>
+                </div>
+              ) : order.deliveryStaff ? (
+                <p className="text-sm text-green-700 mb-3">
+                  Assigned to:{' '}
+                  <span className="font-medium">
+                    {order.deliveryStaff.name}
+                  </span>
+                </p>
+              ) : (
+                <p className="text-sm text-gray-500 mb-3">
+                  Assignment locked
+                </p>
+              )}
 
-              {/* STATUS BUTTON */}
-              <div
-                className={`mt-5 text-center py-3 rounded-xl border
-    transition-all duration-300 cursor-pointer
-    ${status.bg} ${status.text} ${status.border}`}
-              >
-                {status.label}
+              {/* ITEMS */}
+              <table className="w-full text-sm">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="p-2 text-left">
+                      Product
+                    </th>
+                    <th className="p-2 text-left">
+                      Qty
+                    </th>
+                    <th className="p-2 text-left">
+                      Price
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {order.items.map(item => (
+                    <tr
+                      key={item.id}
+                      className="border-t"
+                    >
+                      <td className="p-2">
+                        {item.product.name}
+                      </td>
+                      <td className="p-2">
+                        {item.quantity}
+                      </td>
+                      <td className="p-2">
+                        ₹{item.price}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="text-right font-semibold mt-4">
+                Total: ₹{order.totalPrice}
               </div>
             </div>
           )

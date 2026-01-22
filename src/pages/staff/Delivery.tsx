@@ -24,7 +24,8 @@ const Delivery = () => {
           res.data.map((order: any) => ({
             id: order.id,
             customerName: order.user.name,
-            address: 'Address not available',
+            phone: order.phone ?? 'Not provided',
+            address: order.address ?? 'Not provided',
             totalAmount: order.totalPrice,
             status: order.status,
           }))
@@ -83,12 +84,33 @@ const Delivery = () => {
               key={order.id}
               className="bg-white p-4 rounded shadow"
             >
-              <p className="font-semibold">
+              <p className="font-semibold text-lg">
                 Order #{order.id}
               </p>
-              <p>{order.customerName}</p>
-              <p>₹{order.totalAmount}</p>
-              <p>Status: {order.status}</p>
+
+              <p className="text-sm text-gray-700">
+                <strong>Customer:</strong>{' '}
+                {order.customerName}
+              </p>
+
+              <p className="text-sm">
+                <strong>Phone:</strong>{' '}
+                {order.phone}
+              </p>
+
+              <p className="text-sm">
+                <strong>Address:</strong>{' '}
+                {order.address}
+              </p>
+
+              <p className="mt-1 font-medium">
+                ₹{order.totalAmount}
+              </p>
+
+              <p className="text-sm mt-1">
+                <strong>Status:</strong>{' '}
+                {order.status}
+              </p>
 
               {order.status !== 'DELIVERED' && (
                 <div className="mt-3">
