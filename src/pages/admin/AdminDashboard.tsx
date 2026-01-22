@@ -212,6 +212,18 @@ const AdminDashboard = () => {
           </p>
         </Link>
 
+         <Link
+          to="/admin/inventory/logs"
+          className="bg-white p-6 rounded shadow hover:shadow-md"
+        >
+          <h2 className="text-xl font-semibold">
+            Inventory
+          </h2>
+          <p className="text-gray-600">
+            Stocks Details 
+          </p>
+        </Link>
+
         {/* ⭐ NEW SALES CARD */}
         <Link
           to="/admin/sales"
@@ -221,7 +233,7 @@ const AdminDashboard = () => {
             Sales & Reports
           </h2>
           <p className="text-gray-600">
-            Daily, weekly & monthly revenue
+            Custom date revenue
           </p>
         </Link>
       </div>

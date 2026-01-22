@@ -31,12 +31,13 @@ import AddCategory from './pages/admin/AddCategory'
 import EditCategory from './pages/admin/EditCategory'
 import AdminStaff from './pages/admin/AdminStaff'
 import AdminSales from './pages/admin/AdminSales'
-
+import AdminInventoryLogs from './pages/admin/AdminInventoryLogs'
 /* ================= STAFF ================= */
 import StaffLayout from './pages/staff/StaffLayout'
 import BillingPOS from './pages/staff/BillingPOS'
 import Inventory from './pages/staff/Inventory'
 import Delivery from './pages/staff/Delivery'
+import StaffHome from './pages/staff/StaffHome'
 
 /* ================= CONTEXT / GUARDS ================= */
 import { AuthProvider } from './auth/AuthContext'
@@ -47,11 +48,13 @@ import { CartProvider } from './cart/CartContext'
 
 /* ================= LAYOUT ================= */
 import Layout from './components/Layout'
+import RequireRole from './components/RequireRole'
+
 
 const App = () => {
   return (
+    <CartProvider>
     <AuthProvider>
-      <CartProvider>
         <BrowserRouter>
           <Routes>
 
@@ -105,17 +108,44 @@ const App = () => {
             </Route>
 
             {/* ================= STAFF ================= */}
-            <Route element={<StaffRoute />}>
-              <Route path="staff" element={<StaffLayout />}>
-                <Route index element={<Navigate to="billing" replace />} />
-                <Route path="billing" element={<BillingPOS />} />
-                <Route path="inventory" element={<Inventory />} />
-                <Route path="delivery" element={<Delivery />} />
+          <Route element={<StaffRoute />}>
+  <Route path="staff" element={<StaffLayout />}>
 
-                {/* Staff fallback */}
-                <Route path="*" element={<Navigate to="/staff" replace />} />
-              </Route>
-            </Route>
+    {/* ✅ ROLE-AWARE HOME */}
+    <Route index element={<StaffHome />} />
+
+    <Route
+      path="billing"
+      element={
+        <RequireRole allowedRoles={['SHOP_STAFF', 'ADMIN']}>
+          <BillingPOS />
+        </RequireRole>
+      }
+    />
+
+    <Route
+      path="inventory"
+      element={
+        <RequireRole allowedRoles={['INVENTORY_STAFF', 'ADMIN']}>
+          <Inventory />
+        </RequireRole>
+      }
+    />
+
+    <Route
+      path="delivery"
+      element={
+        <RequireRole allowedRoles={['DELIVERY_STAFF', 'ADMIN']}>
+          <Delivery />
+        </RequireRole>
+      }
+    />
+
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Route>
+</Route>
+
+
 
             {/* ================= ADMIN ================= */}
             <Route element={<AdminRoute />}>
@@ -130,7 +160,8 @@ const App = () => {
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="staff" element={<AdminStaff />} />
                 <Route path="sales" element={<AdminSales />} />
-
+                <Route path="inventory/logs" element={<AdminInventoryLogs />}
+/>
                 {/* Admin fallback */}
                 <Route path="*" element={<Navigate to="/admin" replace />} />
               </Route>
@@ -138,8 +169,8 @@ const App = () => {
 
           </Routes>
         </BrowserRouter>
-      </CartProvider>
     </AuthProvider>
+    </CartProvider>
   )
 }
 

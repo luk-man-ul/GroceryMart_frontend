@@ -47,3 +47,15 @@ export interface Category {
   name: string
 }
 
+export type DeliveryStatus =
+  | 'PLACED'
+  | 'PROCESSING'
+  | 'DELIVERED'
+
+export interface DeliveryOrder {
+  id: number
+  customerName: string
+  address: string
+  totalAmount: number
+  status: DeliveryStatus
+}

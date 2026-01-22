@@ -40,9 +40,13 @@ const AdminLayout = () => {
            <NavLink to="/admin/staff" className={linkClass}>
             Staffs
           </NavLink>
+          <NavLink to="/admin/inventory/logs" className={linkClass}>
+          Inventory
+          </NavLink>
           <NavLink to="/admin/sales" className={linkClass}>
             Sales
           </NavLink>
+        
         </nav>
 
         {/* LOGOUT FIXED AT BOTTOM */}

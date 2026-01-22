@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import api from '../../api/axios'
 import { useNavigate } from 'react-router-dom'
 
-
 interface Category {
   id: number
   name: string
@@ -12,6 +11,7 @@ interface Product {
   id: number
   name: string
   price: number
+  offerPrice?: number | null
   stock: number
   stockType: string
   category: Category
@@ -20,28 +20,18 @@ interface Product {
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
   const [showTrash, setShowTrash] = useState(false)
+  const navigate = useNavigate()
 
-  const restoreProduct = async (id: number) => {
-  try {
-    await api.post(`/products/${id}/restore`)
-    fetchProducts()
-  } catch (err) {
-    console.error('Restore failed', err)
-  }
-}
-
-
+  // =========================
+  // FETCH PRODUCTS
+  // =========================
   const fetchProducts = async () => {
     try {
       setLoading(true)
       const res = await api.get('/products', {
-  params: {
-    trash: showTrash,
-  },
-})
-
+        params: { trash: showTrash },
+      })
       setProducts(res.data)
     } catch (err) {
       console.error('Failed to fetch products', err)
@@ -50,57 +40,88 @@ const AdminProducts = () => {
     }
   }
 
+  // =========================
+  // DELETE PRODUCT
+  // =========================
   const deleteProduct = async (id: number) => {
-    const confirm = window.confirm('Are you sure you want to delete this product?')
+    const confirm = window.confirm(
+      'Are you sure you want to delete this product?',
+    )
     if (!confirm) return
 
     try {
       await api.delete(`/products/${id}`)
-      setProducts(prev => prev.filter(p => p.id !== id))
+      setProducts(prev =>
+        prev.filter(p => p.id !== id),
+      )
     } catch (err) {
       console.error('Failed to delete product', err)
     }
   }
 
-  useEffect(() => {
-  fetchProducts()
-}, [showTrash])
+  // =========================
+  // RESTORE PRODUCT
+  // =========================
+  const restoreProduct = async (id: number) => {
+    try {
+      await api.post(`/products/${id}/restore`)
+      fetchProducts()
+    } catch (err) {
+      console.error('Restore failed', err)
+    }
+  }
 
+  useEffect(() => {
+    fetchProducts()
+  }, [showTrash])
 
   return (
     <div>
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold">Product Management</h1>
+        <h1 className="text-2xl font-semibold">
+          Product Management
+        </h1>
 
         <button
-            onClick={() => navigate('/admin/products/add')} className="bg-black text-white px-4 py-2 rounded">
-            Add Product
+          onClick={() =>
+            navigate('/admin/products/add')
+          }
+          className="bg-black text-white px-4 py-2 rounded"
+        >
+          Add Product
         </button>
       </div>
+
+      {/* TRASH TOGGLE */}
       <div className="flex gap-4 mb-4">
-  <button
-    onClick={() => setShowTrash(false)}
-    className={`px-4 py-2 rounded ${
-      !showTrash ? 'bg-black text-white' : 'border'
-    }`}
-  >
-    Active Products
-  </button>
+        <button
+          onClick={() => setShowTrash(false)}
+          className={`px-4 py-2 rounded ${
+            !showTrash
+              ? 'bg-black text-white'
+              : 'border'
+          }`}
+        >
+          Active Products
+        </button>
 
-  <button
-    onClick={() => setShowTrash(true)}
-    className={`px-4 py-2 rounded ${
-      showTrash ? 'bg-black text-white' : 'border'
-    }`}
-  >
-    Deleted Products
-  </button>
-</div>
+        <button
+          onClick={() => setShowTrash(true)}
+          className={`px-4 py-2 rounded ${
+            showTrash
+              ? 'bg-black text-white'
+              : 'border'
+          }`}
+        >
+          Deleted Products
+        </button>
+      </div>
 
+      {/* TABLE */}
       {loading ? (
         <p>Loading...</p>
       ) : (
-        
         <table className="w-full bg-white rounded shadow">
           <thead className="bg-gray-100 text-left">
             <tr>
@@ -114,48 +135,94 @@ const AdminProducts = () => {
 
           <tbody>
             {products.map(product => (
-              <tr key={product.id} className="border-t">
-                <td className="p-3">{product.name}</td>
-                <td className="p-3">₹{product.price}</td>
+              <tr
+                key={product.id}
+                className="border-t"
+              >
+                {/* NAME */}
                 <td className="p-3">
-                  {product.stock} {product.stockType}
+                  {product.name}
                 </td>
-                <td className="p-3">{product.category?.name}</td>
-                <td className="p-3 space-x-3">
-                 <td className="p-3 space-x-3">
-  {!showTrash ? (
-    <>
-      <button
-        onClick={() => navigate(`/admin/products/edit/${product.id}`)}
-        className="text-blue-600 hover:underline"
-      >
-        Edit
-      </button>
 
-      <button
-        onClick={() => deleteProduct(product.id)}
-        className="text-red-600 hover:underline"
-      >
-        Delete
-      </button>
-    </>
-  ) : (
-    <button
-      onClick={() => restoreProduct(product.id)}
-      className="text-green-600 hover:underline"
-    >
-      Restore
-    </button>
-  )}
-</td>
+                {/* PRICE + OFFER */}
+                <td className="p-3">
+                  {product.offerPrice ? (
+                    <div>
+                      <span className="line-through text-gray-400 mr-2">
+                        ₹{product.price}
+                      </span>
+                      <span className="text-green-600 font-semibold">
+                        ₹{product.offerPrice}
+                      </span>
+                    </div>
+                  ) : (
+                    <span>
+                      ₹{product.price}
+                    </span>
+                  )}
+                </td>
 
+                {/* STOCK */}
+                <td className="p-3">
+                  {product.stock}{' '}
+                  {product.stockType}
+                </td>
+
+                {/* CATEGORY */}
+                <td className="p-3">
+                  {product.category?.name}
+                </td>
+
+                {/* ACTIONS */}
+                <td className="p-3">
+                  <div className="space-x-3">
+                    {!showTrash ? (
+                      <>
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/admin/products/edit/${product.id}`,
+                            )
+                          }
+                          className="text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            deleteProduct(
+                              product.id,
+                            )
+                          }
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        onClick={() =>
+                          restoreProduct(
+                            product.id,
+                          )
+                        }
+                        className="text-green-600 hover:underline"
+                      >
+                        Restore
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
 
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-4 text-center text-gray-500">
+                <td
+                  colSpan={5}
+                  className="p-4 text-center text-gray-500"
+                >
                   No products found
                 </td>
               </tr>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import { useAuth } from '../../auth/AuthContext'
-import { useCart } from '../../cart/CartContext'
+//import { useCart } from '../../cart/CartContext'
 
 const Login = () => {
   const [email, setEmail] = useState('')
@@ -11,49 +11,48 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
 
   const { login } = useAuth()
-  const { refreshCart } = useCart()
+  //const { refreshCart } = useCart()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
+  e.preventDefault()
+  setError('')
+  setLoading(true)
 
-    try {
-      const res = await api.post('/auth/login', {
-        email,
-        password,
-      })
+  try {
+    // 1️⃣ LOGIN API
+    const res = await api.post('/auth/login', {
+      email,
+      password,
+    })
 
-      const token = res.data.access_token
+    const token: string = res.data.access_token
 
-      // 🔐 Save token + role in AuthContext
-      await login(token)
+    // 2️⃣ IMPORTANT: await login
+    await login(token)
 
-      // 🎭 Decode role
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      const role = payload.role
+    // 3️⃣ ROLE-BASED REDIRECT
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    const role = payload.role
 
-      // 🚦 ROLE-BASED REDIRECT (REPLACE HISTORY)
-      if (role === 'ADMIN') {
-        navigate('/admin', { replace: true })
-      } else if (role === 'SHOP_STAFF') {
-        navigate('/staff/billing', { replace: true })
-      } else if (role === 'INVENTORY_STAFF') {
-        navigate('/staff/inventory', { replace: true })
-      } else if (role === 'DELIVERY_STAFF') {
-        navigate('/staff/delivery', { replace: true })
-      } else {
-        // USER
-        await refreshCart()
-        navigate('/', { replace: true })
-      }
-    } catch {
-      setError('Invalid email or password')
-    } finally {
-      setLoading(false)
+    if (role === 'ADMIN') {
+      navigate('/admin', { replace: true })
+    } else if (role === 'SHOP_STAFF') {
+      navigate('/staff/billing', { replace: true })
+    } else if (role === 'INVENTORY_STAFF') {
+      navigate('/staff/inventory', { replace: true })
+    } else if (role === 'DELIVERY_STAFF') {
+      navigate('/staff/delivery', { replace: true })
+    } else {
+      navigate('/', { replace: true })
     }
+  } catch (err: any) {
+    // ONLY login errors should reach here
+    setError('Invalid email or password')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -63,17 +62,31 @@ const Login = () => {
         </h1>
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 text-center">
+          <p
+            className="mb-4 text-sm text-red-600 text-center"
+            role="alert"
+          >
             {error}
           </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+          aria-busy={loading}
+        >
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label
+              htmlFor="email"
+              className="text-sm font-medium"
+            >
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               required
+              autoComplete="email"
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="you@example.com"
               value={email}
@@ -82,10 +95,17 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="text-sm font-medium">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-medium"
+            >
+              Password
+            </label>
             <input
+              id="password"
               type="password"
               required
+              autoComplete="current-password"
               className="mt-1 w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
               placeholder="••••••••"
               value={password}
@@ -94,10 +114,11 @@ const Login = () => {
           </div>
 
           <button
+            type="submit"
             disabled={loading}
             className="w-full bg-black text-white rounded-lg py-2 font-medium hover:opacity-90 disabled:opacity-60"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Logging in…' : 'Login'}
           </button>
         </form>
 
