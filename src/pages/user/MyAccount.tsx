@@ -18,7 +18,7 @@ interface Profile {
 }
 
 const MyAccount = () => {
-  const { role, logout, user } = useAuth() as any
+  const { logout, user } = useAuth() as any
   const [profile, setProfile] = useState<Profile | null>(
     user ?? null,
   )
