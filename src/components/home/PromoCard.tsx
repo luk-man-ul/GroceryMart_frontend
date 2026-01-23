@@ -25,7 +25,7 @@ const PromoCard = ({
     <div
       className={`flex flex-col md:flex-row ${
         reverse ? 'md:flex-row-reverse' : ''
-      } rounded-2xl overflow-hidden shadow-md ${bgColor}`}
+      } rounded-2xl  shadow-md ${bgColor}`}
     >
       {/* TEXT */}
       <div className="flex-1 p-8 flex flex-col justify-center">
@@ -45,7 +45,7 @@ const PromoCard = ({
       </div>
 
       {/* IMAGE */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 ">
         <img
           src={image}
           alt={title}

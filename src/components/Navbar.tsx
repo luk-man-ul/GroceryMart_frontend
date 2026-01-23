@@ -28,7 +28,7 @@ const Navbar = () => {
   }
 
   return (
-    <header className="w-full  bg-gray-100 sticky top-0 z-50">
+    <header className="w-full bg-gray-100 sticky top-0 z-[999]">
       
       {/* TOP BAR */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">

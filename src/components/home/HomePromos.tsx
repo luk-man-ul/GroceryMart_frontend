@@ -6,7 +6,7 @@ import vegetables from '../../assets/home/promos/vegetables.jpeg'
 const HomePromos = () => {
   return (
     <section className="bg-white py-20">
-      <div className="max-w-7xl mx-auto px-6 space-y-8">
+      <div className="max-w-7xl mx-auto px-6 space-y-8 ">
 
         {/* CARD 1 */}
         <PromoCard
