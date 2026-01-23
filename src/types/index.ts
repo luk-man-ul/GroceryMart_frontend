@@ -41,10 +41,10 @@ export interface CartItem {
   product: Product
 }
 
-
 export interface Category {
   id: number
   name: string
+  image?: string | null
 }
 
 export type DeliveryStatus =
@@ -63,4 +63,5 @@ export type DeliveryOrder = {
   totalAmount: number
   status: DeliveryStatus
 }
+
 

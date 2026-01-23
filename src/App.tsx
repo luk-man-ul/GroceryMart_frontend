@@ -18,6 +18,8 @@ import ForgotPassword from './pages/auth/ForgotPassword'
 import OrderConfirmation from './pages/user/OrderConfirmation'
 import MyOrders from './pages/user/MyOrders'
 import MyAccount from './pages/user/MyAccount'
+import Checkout from './pages/user/Checkout'
+import OrderDetails from './pages/user/OrderDetails'
 
 /* ================= ADMIN ================= */
 import AdminLayout from './pages/admin/AdminLayout'
@@ -67,6 +69,8 @@ const App = () => {
               <Route path="new-arrivals" element={<NewArrivals />} />
               <Route path="deals" element={<Deals />} />
               <Route path="cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders/:id" element={<OrderDetails />} />
 
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />

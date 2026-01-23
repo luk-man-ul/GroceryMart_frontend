@@ -3,19 +3,12 @@ import api from '../../api/axios'
 import { useAuth } from '../../auth/AuthContext'
 import { useCart } from '../../cart/CartContext'
 import type { CartItem } from '../../types'
-import { useState } from 'react'
 
 const Cart = () => {
   const { items, refreshCart } = useCart()
   const { token } = useAuth()
   const isAuthenticated = !!token
   const navigate = useNavigate()
-
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [phone, setPhone] = useState('')
-  const [address, setAddress] = useState('')
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
 
   const handleDecrease = async (item: CartItem) => {
     try {
@@ -62,39 +55,6 @@ const Cart = () => {
     (sum, item) => sum + item.quantity * item.product.price,
     0,
   )
-
-  const placeOrder = async () => {
-    if (submitting) return
-
-    setError('')
-
-    if (phone.trim().length < 10) {
-      setError('Please enter a valid phone number')
-      return
-    }
-
-    if (address.trim().length < 10) {
-      setError('Please enter a valid delivery address')
-      return
-    }
-
-    try {
-      setSubmitting(true)
-
-      await api.post('/orders', {
-        phone,
-        address,
-      })
-
-      await refreshCart()
-      setShowConfirm(false)
-      navigate('/order-success')
-    } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Order failed')
-    } finally {
-      setSubmitting(false)
-    }
-  }
 
   if (items.length === 0) {
     return (
@@ -171,10 +131,10 @@ const Cart = () => {
       {/* ACTION */}
       {isAuthenticated ? (
         <button
-          onClick={() => setShowConfirm(true)}
+          onClick={() => navigate('/checkout')}
           className="mt-6 w-full bg-black text-white py-3 rounded-xl text-lg"
         >
-          Place Order
+          Check Out
         </button>
       ) : (
         <Link
@@ -183,59 +143,6 @@ const Cart = () => {
         >
           Login to Place Order
         </Link>
-      )}
-
-      {/* CONFIRM MODAL */}
-      {showConfirm && (
-        <div className="fixed inset-0 say bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl w-[90%] max-w-md shadow-xl overflow-hidden">
-            <div className="bg-green-600 px-6 py-4">
-              <h2 className="text-white text-lg font-semibold">
-                Delivery Details
-              </h2>
-            </div>
-
-            <div className="px-6 py-5 space-y-4">
-              <input
-                type="text"
-                placeholder="Phone number"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
-
-              <textarea
-                placeholder="Delivery address"
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                className="w-full border p-2 rounded"
-                rows={3}
-              />
-
-              {error && (
-                <p className="text-sm text-red-600">{error}</p>
-              )}
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowConfirm(false)}
-                  className="px-5 py-2 rounded border"
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={placeOrder}
-                  disabled={submitting}
-                  className="px-5 py-2 rounded bg-green-600 text-white disabled:opacity-60"
-                >
-                  {submitting ? 'Placing…' : 'Confirm Order'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )
