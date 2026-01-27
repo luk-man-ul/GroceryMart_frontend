@@ -1,15 +1,33 @@
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import "swiper/css";
+// FeaturedSlider.tsx
+import { useEffect, useState } from 'react'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation } from 'swiper/modules'
+import 'swiper/css'
 
-import FeaturedCard from "./FeaturedCard";
-import { featuredData } from "./featuredData";
+import api from '../../../api/axios'
+import type { Product } from '../../../types'
+import FeaturedCard from './FeaturedCard'
+import { Link } from 'react-router-dom'
 
 const FeaturedSlider = () => {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    api
+      .get('/products')
+      .then(res => {
+        // Take first 6 products as featured
+        setProducts(res.data.slice(0, 6))
+      })
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading || products.length === 0) return null
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-14">
-
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <span className="bg-orange-500 text-white text-xs px-3 py-1 rounded-md">
@@ -20,18 +38,21 @@ const FeaturedSlider = () => {
           </h2>
         </div>
 
-        <a href="/products" className="text-sm text-gray-600 hover:text-black">
+        <Link
+          to="/products"
+          className="text-sm text-gray-600 hover:text-black"
+        >
           See All
-        </a>
+        </Link>
       </div>
 
-      {/* Slider */}
+      {/* SLIDER WRAPPER */}
       <div className="relative">
         <Swiper
           modules={[Navigation]}
           navigation={{
-            prevEl: ".featured-prev",
-            nextEl: ".featured-next",
+            prevEl: '.featured-prev',
+            nextEl: '.featured-next',
           }}
           spaceBetween={24}
           slidesPerView={5}
@@ -42,24 +63,37 @@ const FeaturedSlider = () => {
             1280: { slidesPerView: 5 },
           }}
         >
-          {featuredData.map((item) => (
-            <SwiperSlide key={item.id}>
-              <FeaturedCard item={item} />
+          {products.map(product => (
+            <SwiperSlide key={product.id}>
+              <FeaturedCard product={product} />
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* Navigation Buttons */}
-        <button className="featured-prev absolute left-[-20px] top-1/2 -translate-y-1/2 bg-white shadow rounded-full w-10 h-10 flex items-center justify-center z-10">
+        {/* LEFT ARROW */}
+        <button
+          className="featured-prev absolute -left-5 top-1/2 -translate-y-1/2
+                     bg-white shadow-md rounded-full w-10 h-10
+                     flex items-center justify-center z-10
+                     hover:scale-105 transition"
+          aria-label="Previous"
+        >
           ‹
         </button>
 
-        <button className="featured-next absolute right-[-20px] top-1/2 -translate-y-1/2 bg-white shadow rounded-full w-10 h-10 flex items-center justify-center z-10">
+        {/* RIGHT ARROW */}
+        <button
+          className="featured-next absolute -right-5 top-1/2 -translate-y-1/2
+                     bg-white shadow-md rounded-full w-10 h-10
+                     flex items-center justify-center z-10
+                     hover:scale-105 transition"
+          aria-label="Next"
+        >
           ›
         </button>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default FeaturedSlider;
+export default FeaturedSlider

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import type { CategoryItem } from "./categoryData";
 
 type Props = {
@@ -5,8 +6,18 @@ type Props = {
 };
 
 const CategoryCard = ({ item }: Props) => {
+  const navigate = useNavigate();
+
+  const handleCategoryClick = () => {
+    // Navigate to products page with category filter
+    navigate(`/products?categoryId=${item.id}`);
+  };
+
   return (
-    <div className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition cursor-pointer">
+    <div 
+      onClick={handleCategoryClick}
+      className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition cursor-pointer transform hover:scale-105"
+    >
       <img
         src={item.image}
         alt={item.name}

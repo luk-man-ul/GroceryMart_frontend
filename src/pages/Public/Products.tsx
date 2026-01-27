@@ -89,23 +89,25 @@ const Products = () => {
                            hover:border-gray-200 shadow-sm hover:shadow-xl
                            transition-all duration-300 overflow-hidden"
               >
-                {/* IMAGE + BADGE */}
-                <div className="relative bg-gray-50 h-44 flex items-center justify-center">
-                  {discountPercent > 0 && (
-                    <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      {discountPercent}% OFF
-                    </span>
-                  )}
+{/* IMAGE + BADGE */}
+<div className="relative bg-gray-50 h-44 rounded-xl overflow-hidden">
+  {discountPercent > 0 && (
+    <span className="absolute top-3 left-3 z-10 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+      {discountPercent}% OFF
+    </span>
+  )}
 
-                  <Link to={`/products/${product.id}`}>
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="max-h-32 object-contain transition-transform duration-300
-                                 group-hover:scale-105"
-                    />
-                  </Link>
-                </div>
+  <Link
+    to={`/products/${product.id}`}
+    className="w-full h-full flex items-center justify-center"
+  >
+    <img
+      src={product.image}
+      alt={product.name}
+      className="max-h-32 object-contain transition-transform duration-300 ease-out group-hover:scale-105"
+    />
+  </Link>
+</div>
 
                 {/* CONTENT */}
                 <div className="p-4 flex flex-col">
