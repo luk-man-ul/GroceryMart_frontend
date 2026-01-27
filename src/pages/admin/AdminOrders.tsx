@@ -17,21 +17,17 @@ interface Order {
   totalPrice: number
   status: OrderStatus
   createdAt: string
-
   phone?: string | null
   address?: string | null
-
   user: {
     name: string
     email: string
   }
-
   deliveryStaff?: {
     id: number
     name: string
     email: string
   } | null
-
   items: OrderItem[]
 }
 
@@ -42,15 +38,18 @@ interface Staff {
   isActive: boolean
 }
 
+const statusStyles: Record<OrderStatus, string> = {
+  PLACED: 'bg-yellow-100 text-yellow-800',
+  PROCESSING: 'bg-blue-100 text-blue-800',
+  DELIVERED: 'bg-green-100 text-green-800',
+}
+
 const AdminOrders = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(false)
   const [assigning, setAssigning] = useState<number | null>(null)
 
-  // =========================
-  // FETCH ORDERS
-  // =========================
   const fetchOrders = async () => {
     try {
       setLoading(true)
@@ -63,9 +62,6 @@ const AdminOrders = () => {
     }
   }
 
-  // =========================
-  // FETCH DELIVERY STAFF
-  // =========================
   const fetchStaff = async () => {
     try {
       const res = await api.get('/admin/staff')
@@ -85,9 +81,6 @@ const AdminOrders = () => {
     fetchStaff()
   }, [])
 
-  // =========================
-  // ASSIGN DELIVERY STAFF
-  // =========================
   const assignDeliveryStaff = async (
     orderId: number,
     staffId: number,
@@ -121,7 +114,6 @@ const AdminOrders = () => {
         ),
       )
     } catch (err) {
-      console.error('Assignment failed', err)
       alert('Failed to assign delivery staff')
     } finally {
       setAssigning(null)
@@ -129,60 +121,63 @@ const AdminOrders = () => {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-6">
-        Orders
+    <div className="min-h-screen bg-gray-50 p-6">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">
+        Orders Management
       </h1>
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="text-center text-gray-500">
+          Loading orders...
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {orders.map(order => (
             <div
               key={order.id}
-              className="bg-white p-6 rounded shadow"
+              className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-4 border-l-blue-500 hover:shadow-md transition"
             >
               {/* HEADER */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="space-y-1 text-sm">
-                  <p className="font-semibold text-base">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 p-6 border-b">
+                <div className="space-y-1">
+                  <p className="text-lg font-semibold">
                     Order #{order.id}
                   </p>
-
-                  <p className="text-gray-600">
-                    {order.user.name} — {order.user.email}
+                  <p className="text-sm text-gray-600">
+                    {order.user.name} • {order.user.email}
                   </p>
-
-                  <p className="text-gray-500">
-                    {new Date(
-                      order.createdAt,
-                    ).toLocaleString()}
+                  <p className="text-xs text-gray-500">
+                    {new Date(order.createdAt).toLocaleString()}
                   </p>
-
-                  <div className="pt-2">
-                    <p>
-                      <strong>Phone:</strong>{' '}
-                      {order.phone ?? 'Not provided'}
-                    </p>
-
-                    <p>
-                      <strong>Address:</strong>{' '}
-                      {order.address ?? 'Not provided'}
-                    </p>
-                  </div>
                 </div>
 
-                {/* STATUS */}
-                <div className="text-sm font-medium px-3 py-1 rounded bg-gray-100">
-                  Status: {order.status}
-                </div>
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${statusStyles[order.status]}`}
+                >
+                  {order.status}
+                </span>
               </div>
 
-              {/* DELIVERY ASSIGNMENT */}
-              {order.status === 'PLACED' &&
-              !order.deliveryStaff ? (
-                <div className="mb-3">
+              {/* CONTACT INFO */}
+              <div className="px-6 py-4 grid md:grid-cols-2 gap-4 text-sm">
+                <p>
+                  <span className="font-medium text-gray-700">
+                    Phone:
+                  </span>{' '}
+                  {order.phone ?? 'Not provided'}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-700">
+                    Address:
+                  </span>{' '}
+                  {order.address ?? 'Not provided'}
+                </p>
+              </div>
+
+              {/* ASSIGNMENT */}
+              <div className="px-6 pb-4">
+                {order.status === 'PLACED' &&
+                !order.deliveryStaff ? (
                   <select
                     defaultValue=""
                     disabled={assigning === order.id}
@@ -192,78 +187,75 @@ const AdminOrders = () => {
                         Number(e.target.value),
                       )
                     }
-                    className="border p-2 rounded text-sm"
+                    className="w-full md:w-72 rounded-lg border ring-2 ring-blue-200 text-sm"
                   >
                     <option value="" disabled>
                       Assign delivery staff
                     </option>
-
                     {staff.map(s => (
-                      <option
-                        key={s.id}
-                        value={s.id}
-                      >
+                      <option key={s.id} value={s.id}>
                         {s.name}
                       </option>
                     ))}
                   </select>
+                ) : order.deliveryStaff ? (
+                  <p className="text-sm text-green-700 font-medium">
+                    Assigned to {order.deliveryStaff.name}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Assignment locked
+                  </p>
+                )}
+              </div>
+
+              {/* ITEMS TABLE */}
+              <div className="px-6 pb-6">
+                <div className="overflow-hidden rounded-lg border">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-100 text-gray-600">
+                      <tr>
+                        <th className="p-3 text-left">
+                          Product
+                        </th>
+                        <th className="p-3 text-left">
+                          Qty
+                        </th>
+                        <th className="p-3 text-left">
+                          Price
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.items.map(item => (
+                        <tr
+                          key={item.id}
+                          className="border-t hover:bg-gray-50"
+                        >
+                          <td className="p-3">
+                            {item.product.name}
+                          </td>
+                          <td className="p-3">
+                            {item.quantity}
+                          </td>
+                          <td className="p-3">
+                            ₹{item.price}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ) : order.deliveryStaff ? (
-                <p className="text-sm text-green-700 mb-3">
-                  Assigned to:{' '}
-                  <span className="font-medium">
-                    {order.deliveryStaff.name}
-                  </span>
-                </p>
-              ) : (
-                <p className="text-sm text-gray-500 mb-3">
-                  Assignment locked
-                </p>
-              )}
 
-              {/* ITEMS */}
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-2 text-left">
-                      Product
-                    </th>
-                    <th className="p-2 text-left">
-                      Qty
-                    </th>
-                    <th className="p-2 text-left">
-                      Price
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map(item => (
-                    <tr
-                      key={item.id}
-                      className="border-t"
-                    >
-                      <td className="p-2">
-                        {item.product.name}
-                      </td>
-                      <td className="p-2">
-                        {item.quantity}
-                      </td>
-                      <td className="p-2">
-                        ₹{item.price}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="text-right font-semibold mt-4">
-                Total: ₹{order.totalPrice}
+                <div className="text-right mt-4 text-lg font-semibold">
+                  Total: ₹{order.totalPrice}
+                </div>
               </div>
             </div>
           ))}
 
           {orders.length === 0 && (
-            <p className="text-gray-500">
+            <p className="text-center text-gray-500">
               No orders found
             </p>
           )}

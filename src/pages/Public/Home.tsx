@@ -9,6 +9,9 @@ import freshVeg from '../../assets/home/features/fresh-veg.jpeg'
 import delivery from '../../assets/home/features/delivery.jpeg'
 import family from '../../assets/home/features/family.jpeg'
 import HomePromos from '../../components/home/HomePromos'
+import HeroSlider from "../../components/home/HeroSlider";
+import FeaturedSlider from "../../components/home/featured/FeaturedSlider";
+import CategoriesSlider from "../../components/home/categories/CategoriesSlider";
 
 
 const Home = () => {
@@ -31,6 +34,10 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {/* ================= HERO SLIDER ================= */}
+      <HeroSlider />  
+
+      <FeaturedSlider />    
 
       {/* ================= HERO SECTION ================= */}
       <section className="bg-[#f6f7e7]">
@@ -93,6 +100,10 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+            <CategoriesSlider />  
+
+ 
 
       {/* ================= PROMO SECTION ================= */}
 <HomePromos />

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import { Search, ShoppingCart, MapPin, User } from "lucide-react"
+import { Search, ShoppingCart, User } from "lucide-react"
 import { useAuth } from "../auth/AuthContext"
 import { useCart } from "../cart/CartContext"
 
@@ -28,7 +28,7 @@ const Navbar = () => {
   }
 
   return (
-    <header className="w-full bg-gray-100 sticky top-0 z-[999]">
+    <header className="w-full  bg-gray-100 sticky top-0 z-[999]">
       
       {/* TOP BAR */}
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6">
@@ -42,16 +42,16 @@ const Navbar = () => {
         </Link>
 
         {/* DELIVERY */}
-        <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
+        {/* <div className="hidden md:flex items-center gap-2 text-sm text-gray-600">
           <MapPin size={16} />
           <span>
             Delivery to <span className="font-semibold text-gray-800">Your Area</span>
           </span>
-        </div>
+        </div> */}
 
         {/* SEARCH */}
         <div className="flex-1">
-          <div className="relative max-w-2xl mx-auto">
+          <div className="relative max-w-2xl border rounded-full mx-auto">
             <input
               type="text"
               placeholder="Search products"

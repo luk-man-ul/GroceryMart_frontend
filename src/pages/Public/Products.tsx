@@ -10,11 +10,9 @@ const Products = () => {
   const [loading, setLoading] = useState(false)
   const [categoryId, setCategoryId] = useState<number | null>(null)
 
-  // Track which product was added
   const [addedProductId, setAddedProductId] = useState<number | null>(null)
 
   const { refreshCart } = useCart()
-
   const [searchParams] = useSearchParams()
   const search = searchParams.get('search') || ''
 
@@ -42,7 +40,6 @@ const Products = () => {
 
       await refreshCart()
       setAddedProductId(productId)
-
       setTimeout(() => setAddedProductId(null), 2000)
     } catch {
       alert('Failed to add to cart')
@@ -50,26 +47,30 @@ const Products = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-6 py-8">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Products</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <h2 className="text-3xl font-bold tracking-tight">Products</h2>
         <CategoryDropdown onSelect={setCategoryId} />
       </div>
 
-      {loading && <p>Loading...</p>}
+      {loading && (
+        <div className="text-center py-16 text-gray-500 animate-pulse">
+          Loading products…
+        </div>
+      )}
 
       {hasNoResults && (
-        <div className="text-center py-16 text-gray-600">
-          <p className="text-lg font-semibold">No products found</p>
+        <div className="text-center py-24 text-gray-600">
+          <p className="text-xl font-semibold">No products found</p>
           <p className="text-sm mt-2">
-            Try searching with a different name or remove filters.
+            Try changing your search or category.
           </p>
         </div>
       )}
 
       {!hasNoResults && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {products.map(product => {
             const sellingPrice = product.offerPrice ?? product.price
             const discountPercent = product.offerPrice
@@ -82,69 +83,71 @@ const Products = () => {
             const isAdded = addedProductId === product.id
 
             return (
-              <div key={product.id} className="flex justify-center">
-                {/* ✅ CARD (relative is IMPORTANT) */}
-                <div className="relative w-[260px] bg-white rounded-2xl shadow-sm hover:shadow-lg transition p-4">
-
-                  {/* ✅ DISCOUNT BADGE */}
+              <div
+                key={product.id}
+                className="group bg-white rounded-2xl border border-gray-100
+                           hover:border-gray-200 shadow-sm hover:shadow-xl
+                           transition-all duration-300 overflow-hidden"
+              >
+                {/* IMAGE + BADGE */}
+                <div className="relative bg-gray-50 h-44 flex items-center justify-center">
                   {discountPercent > 0 && (
-                    <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs px-3 py-1 rounded-full z-10">
+                    <span className="absolute top-3 left-3 bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
                       {discountPercent}% OFF
                     </span>
                   )}
 
-                  {/* IMAGE */}
                   <Link to={`/products/${product.id}`}>
-                    <div className="bg-gray-50 rounded-xl p-4 h-[180px] flex items-center justify-center">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="max-h-full object-contain"
-                      />
-                    </div>
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="max-h-32 object-contain transition-transform duration-300
+                                 group-hover:scale-105"
+                    />
                   </Link>
+                </div>
 
-                  {/* STOCK */}
+                {/* CONTENT */}
+                <div className="p-4 flex flex-col">
                   <p
-                    className={`text-xs text-center mt-3 ${
-                      outOfStock ? 'text-red-600' : 'text-green-600'
+                    className={`text-xs mb-1 ${
+                      outOfStock ? 'text-red-500' : 'text-green-600'
                     }`}
                   >
-                    {outOfStock ? 'Out of Stock' : 'Available (In Stock)'}
+                    {outOfStock ? 'Out of stock' : 'In stock'}
                   </p>
 
-                  {/* NAME */}
-                  <h3 className="text-sm font-semibold text-center mt-2">
+                  <h3 className="text-sm font-semibold leading-snug line-clamp-2">
                     {product.name}
                   </h3>
 
-                  {/* PRICE */}
-                  <div className="flex justify-center gap-2 mt-2">
-                    <span className="font-bold">₹ {sellingPrice}</span>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-base font-bold text-gray-900">
+                      ₹ {sellingPrice}
+                    </span>
                     {product.offerPrice && (
-                      <span className="line-through text-gray-400">
+                      <span className="text-xs text-gray-400 line-through">
                         ₹ {product.price}
                       </span>
                     )}
                   </div>
 
-                  {/* ADD TO CART */}
+                  {/* CTA */}
                   <button
                     disabled={outOfStock}
                     onClick={() => addToCart(product.id)}
-                    className={`mt-4 w-full py-2 rounded-xl font-medium transition
+                    className={`mt-4 py-2 rounded-xl text-sm font-medium transition-all
                       ${
                         outOfStock
-                          ? 'bg-gray-300 cursor-not-allowed'
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                           : 'bg-black text-white hover:bg-gray-800'
                       }`}
                   >
                     Add to Cart
                   </button>
 
-                  {/* SUCCESS MESSAGE */}
                   {isAdded && (
-                    <p className="mt-2 text-center text-green-600 text-sm font-medium">
+                    <p className="mt-2 text-center text-green-600 text-xs font-medium">
                       ✔ Added to cart
                     </p>
                   )}

@@ -3,7 +3,36 @@
 html, body {
   height: auto;
 }
+body{
+  overflow-x:hidden ;
+}
 
-body {
-  overflow-x: hidden;
+/* ===== Swiper Navigation (Categories) ===== */
+.swiper-button-prev,
+.swiper-button-next {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  color: #111 !important;
+
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+}
+
+.swiper-button-prev::after,
+.swiper-button-next::after {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.swiper-button-prev {
+  left: -18px;
+}
+
+.swiper-button-next {
+  right: -18px;
 }
