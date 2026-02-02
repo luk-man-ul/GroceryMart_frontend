@@ -1,50 +1,41 @@
-// CategoryDropdown.tsx (modern pill-based category selector)
+// CategoryDropdown.tsx (controlled version)
 
 import { useEffect, useState } from 'react'
 import api from '../api/axios'
 import type { Category } from '../types'
 
 interface Props {
+  value: number | null
   onSelect: (categoryId: number | null) => void
 }
 
-const CategoryDropdown = ({ onSelect }: Props) => {
+const CategoryDropdown = ({ value, onSelect }: Props) => {
   const [categories, setCategories] = useState<Category[]>([])
-  const [activeId, setActiveId] = useState<number | null>(null)
 
   useEffect(() => {
     api.get('/categories').then(res => setCategories(res.data))
   }, [])
 
-  const handleSelect = (id: number | null) => {
-    setActiveId(id)
-    onSelect(id)
-  }
-
   if (categories.length === 0) return null
 
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">
-        {/* Shop by Category */}
-      </h3>
-
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
         {/* ALL PRODUCTS */}
         <button
-          onClick={() => handleSelect(null)}
+          onClick={() => onSelect(null)}
           className={`group flex flex-col items-center min-w-[72px] transition
             ${
-              activeId === null
+              value === null
                 ? 'text-black'
                 : 'text-gray-500 hover:text-black'
             }`}
         >
           <div
             className={`w-15 h-15 rounded-full flex items-center justify-center
-              border transition  transition-all duration-300 ease-out group-hover:scale-110
+              border transition-all duration-300 ease-out group-hover:scale-110
               ${
-                activeId === null
+                value === null
                   ? 'border-black'
                   : 'border-gray-200'
               }`}
@@ -57,12 +48,12 @@ const CategoryDropdown = ({ onSelect }: Props) => {
         </button>
 
         {categories.map(category => {
-          const isActive = activeId === category.id
+          const isActive = value === category.id
 
           return (
             <button
               key={category.id}
-              onClick={() => handleSelect(category.id)}
+              onClick={() => onSelect(category.id)}
               className={`group flex flex-col items-center min-w-[72px] transition
                 ${
                   isActive
@@ -72,7 +63,7 @@ const CategoryDropdown = ({ onSelect }: Props) => {
             >
               <div
                 className={`w-15 h-15 rounded-full bg-white flex items-center justify-center
-                  border transition overflow-hidden transition-all duration-300 ease-out group-hover:scale-110
+                  border overflow-hidden transition-all duration-300 ease-out group-hover:scale-110
                   ${
                     isActive
                       ? 'border-black'

@@ -18,7 +18,8 @@ const FeaturedSlider = () => {
       .get('/products')
       .then(res => {
         // Take first 6 products as featured
-        setProducts(res.data.slice(0, 6))
+        setProducts(res.data.data.slice(0, 6))
+
       })
       .finally(() => setLoading(false))
   }, [])

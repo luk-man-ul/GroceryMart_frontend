@@ -20,6 +20,8 @@ import MyOrders from './pages/user/MyOrders'
 import MyAccount from './pages/user/MyAccount'
 import Checkout from './pages/user/Checkout'
 import OrderDetails from './pages/user/OrderDetails'
+import DeliveryLocation from './pages/user/DeliveryLocation'
+import AddressBook from './pages/user/AddressBook'
 
 /* ================= ADMIN ================= */
 import AdminLayout from './pages/admin/AdminLayout'
@@ -60,56 +62,63 @@ const App = () => {
         <BrowserRouter>
           <Routes>
 
-            {/* ================= PUBLIC + USER ================= */}
-            <Route element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="products" element={<Products />} />
-              <Route path="products/:id" element={<ProductDetails />} />
-              <Route path="aboutus" element={<AboutUs />} />
-              <Route path="new-arrivals" element={<NewArrivals />} />
-              <Route path="deals" element={<Deals />} />
-              <Route path="cart" element={<Cart />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/orders/:id" element={<OrderDetails />} />
+           {/* ================= PUBLIC + USER ================= */}
+<Route element={<Layout />}>
 
-              <Route path="login" element={<Login />} />
-              <Route path="register" element={<Register />} />
-              <Route path="forgot-password" element={<ForgotPassword />} />
+  <Route index element={<Home />} />
+  <Route path="products" element={<Products />} />
+  <Route path="products/:id" element={<ProductDetails />} />
+  <Route path="aboutus" element={<AboutUs />} />
+  <Route path="new-arrivals" element={<NewArrivals />} />
+  <Route path="deals" element={<Deals />} />
+  <Route path="cart" element={<Cart />} />
 
-              <Route
-                path="order-success"
-                element={
-                  <ProtectedRoute roles={['USER']}>
-                    <OrderConfirmation />
-                  </ProtectedRoute>
-                }
-              />
+  <Route path="checkout" element={<Checkout />} />
+  <Route path="orders/:id" element={<OrderDetails />} />
+  <Route path="delivery-location" element={<DeliveryLocation />} />
 
-              <Route
-                path="orders"
-                element={
-                  <ProtectedRoute roles={['USER']}>
-                    <MyOrders />
-                  </ProtectedRoute>
-                }
-              />
+  <Route path="login" element={<Login />} />
+  <Route path="register" element={<Register />} />
+  <Route path="forgot-password" element={<ForgotPassword />} />
 
-              <Route
-                path="account"
-                element={
-                  <ProtectedRoute
-                    roles={[
-                      'USER'
-                    ]}
-                  >
-                    <MyAccount />
-                  </ProtectedRoute>
-                }
-              />
+  <Route
+    path="order-success"
+    element={
+      <ProtectedRoute roles={['USER']}>
+        <OrderConfirmation />
+      </ProtectedRoute>
+    }
+  />
 
-              {/* Public fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
+  <Route
+    path="orders"
+    element={
+      <ProtectedRoute roles={['USER']}>
+        <MyOrders />
+      </ProtectedRoute>
+    }
+  />
+
+  {/* ✅ ACCOUNT ROUTES (FIXED) */}
+  <Route
+    path="account"
+    element={
+      <ProtectedRoute roles={['USER']}>
+        <MyAccount />
+      </ProtectedRoute>
+    }
+  >
+    {/* ✅ NESTED ADDRESS BOOK */}
+    <Route
+      path="addresses"
+      element={<AddressBook />}
+    />
+  </Route>
+
+  {/* Public fallback */}
+  <Route path="*" element={<Navigate to="/" replace />} />
+</Route>
+
 
             {/* ================= STAFF ================= */}
           <Route element={<StaffRoute />}>

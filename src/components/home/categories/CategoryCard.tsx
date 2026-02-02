@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import type { CategoryItem } from "./categoryData";
+import type { CategoryItem } from "./categoryImages";
 
 type Props = {
   item: CategoryItem;

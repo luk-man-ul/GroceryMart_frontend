@@ -24,7 +24,7 @@ const BillingPOS = () => {
 
   // Load products
   useEffect(() => {
-    api.get('/products').then(res => setProducts(res.data))
+    api.get('/products/all').then(res => setProducts(res.data.data))
   }, [])
 
   // Filter products based on search

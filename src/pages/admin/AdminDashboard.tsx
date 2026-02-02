@@ -49,7 +49,7 @@ const AdminDashboard = () => {
       try {
         setLoading(true)
         const [productsRes, categoriesRes, ordersRes, staffRes] = await Promise.all([
-          api.get('/products'),
+          api.get('admin/products'),
           api.get('/categories'),
           api.get('/orders'),
           api.get('/admin/staff'),

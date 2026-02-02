@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../auth/AuthContext'
 import api from '../../api/axios'
-import { Link } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   User,
   Package,
@@ -19,14 +19,15 @@ interface Profile {
 
 const MyAccount = () => {
   const { logout, user } = useAuth() as any
+  const location = useLocation()
+
   const [profile, setProfile] = useState<Profile | null>(
     user ?? null,
   )
   const [loading, setLoading] = useState(false)
 
-  // =========================
-  // FETCH USER PROFILE (SAFE)
-  // =========================
+  const isSubPage = location.pathname.includes('/account/')
+
   useEffect(() => {
     if (profile) return
 
@@ -49,15 +50,14 @@ const MyAccount = () => {
   }, [profile])
 
   return (
-    <div className="min-h-screen bg-gray-50 py-14">
+    <div className="min-h-screen bg-gray-50 py-4">
       <div className="max-w-6xl mx-auto px-6">
-        {/* PAGE TITLE */}
         <h1 className="text-3xl font-bold mb-10">
           My Account
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* LEFT – PROFILE CARD */}
+          {/* LEFT – PROFILE */}
           <div className="bg-white rounded-2xl shadow-sm p-6 text-center">
             <div className="w-20 h-20 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4">
               <User size={36} className="text-green-700" />
@@ -79,10 +79,6 @@ const MyAccount = () => {
                     {profile.email}
                   </p>
                 )}
-
-                <p className="text-sm text-gray-500 mt-2">
-                  
-                </p>
               </>
             )}
 
@@ -95,70 +91,77 @@ const MyAccount = () => {
             </button>
           </div>
 
-          {/* RIGHT – ACTION CARDS */}
-          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* MY ORDERS */}
-            <Link
-              to="/orders"
-              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition"
-            >
-              <div className="flex items-center gap-4">
-                <Package className="text-green-700" />
-                <div>
-                  <h3 className="font-semibold">
-                    My Orders
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    View and track your orders
-                  </p>
-                </div>
-              </div>
-            </Link>
+          {/* RIGHT – CONTENT */}
+          <div className="md:col-span-2">
+            {/* ACTION CARDS (only on main account page) */}
+            {!isSubPage && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <Link
+                  to="/orders"
+                  className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center gap-4">
+                    <Package className="text-green-700" />
+                    <div>
+                      <h3 className="font-semibold">
+                        My Orders
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        View and track your orders
+                      </p>
+                    </div>
+                  </div>
+                </Link>
 
-            {/* ADDRESS BOOK */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition cursor-pointer">
-              <div className="flex items-center gap-4">
-                <MapPin className="text-green-700" />
-                <div>
-                  <h3 className="font-semibold">
-                    Address Book
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Manage delivery addresses
-                  </p>
-                </div>
-              </div>
-            </div>
+                <Link
+                  to="addresses"
+                  className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition"
+                >
+                  <div className="flex items-center gap-4">
+                    <MapPin className="text-green-700" />
+                    <div>
+                      <h3 className="font-semibold">
+                        Address Book
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Manage delivery addresses
+                      </p>
+                    </div>
+                  </div>
+                </Link>
 
-            {/* ACCOUNT SETTINGS */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition cursor-pointer">
-              <div className="flex items-center gap-4">
-                <Settings className="text-green-700" />
-                <div>
-                  <h3 className="font-semibold">
-                    Account Settings
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Update account preferences
-                  </p>
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center gap-4">
+                    <Settings className="text-green-700" />
+                    <div>
+                      <h3 className="font-semibold">
+                        Account Settings
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Update account preferences
+                      </p>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* HELP */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition cursor-pointer">
-              <div className="flex items-center gap-4">
-                <HelpCircle className="text-green-700" />
-                <div>
-                  <h3 className="font-semibold">
-                    Help & Support
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Get help with your account
-                  </p>
+                <div className="bg-white rounded-2xl shadow-sm p-6">
+                  <div className="flex items-center gap-4">
+                    <HelpCircle className="text-green-700" />
+                    <div>
+                      <h3 className="font-semibold">
+                        Help & Support
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Get help with your account
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* ✅ NESTED ROUTES RENDER HERE (CORRECT PLACE) */}
+            <Outlet />
           </div>
         </div>
       </div>

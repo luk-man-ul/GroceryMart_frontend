@@ -45,7 +45,7 @@ const AdminProducts = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      const res = await api.get('/products', {
+      const res = await api.get('/admin/products', {
         params: { trash: showTrash },
       })
       setProducts(res.data)
