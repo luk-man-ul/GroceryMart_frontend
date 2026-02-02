@@ -46,6 +46,37 @@ const AdminOrders = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | OrderStatus>('all')
 
+  // 🔹 WhatsApp helper: shop owner → customer (send on click)
+const buildCustomerWhatsAppLink = (order: Order) => {
+  if (!order.phone) return '#'
+
+  const itemsText = order.items
+    .map(
+      item =>
+        `- ${item.product.name} x${item.quantity} = ₹${item.price * item.quantity}`,
+    )
+    .join('\n')
+
+  const message = `
+Hello ${order.user.name},
+
+Your order #${order.id} has been placed successfully.
+
+Items:
+${itemsText}
+
+Total Amount: ₹${order.totalPrice}
+
+Delivery Address:
+${order.address ?? 'N/A'}
+
+Thank you for shopping with us.
+`
+
+  return `https://wa.me/${order.phone}?text=${encodeURIComponent(message)}`
+}
+
+
   // Filter orders based on search and status
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
@@ -356,16 +387,31 @@ const AdminOrders = () => {
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-4">
-                      <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        <span className="font-semibold">{order.status}</span>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-indigo-100 text-sm">Total Amount</p>
-                        <p className="text-2xl font-bold">₹{order.totalPrice.toLocaleString()}</p>
-                      </div>
-                    </div>
+                   <div className="flex items-center gap-4">
+  <div className={`flex items-center gap-2 px-4 py-2 rounded-full border ${getStatusColor(order.status)}`}>
+    {getStatusIcon(order.status)}
+    <span className="font-semibold">{order.status}</span>
+  </div>
+
+  <div className="text-right">
+    <p className="text-indigo-100 text-sm">Total Amount</p>
+    <p className="text-2xl font-bold">
+      ₹{order.totalPrice.toLocaleString()}
+    </p>
+  </div>
+
+  {order.phone && (
+    <button
+      onClick={() =>
+        window.open(buildCustomerWhatsAppLink(order), '_blank')
+      }
+      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+    >
+      Reply on WhatsApp
+    </button>
+  )}
+</div>
+
                   </div>
                 </div>
 
