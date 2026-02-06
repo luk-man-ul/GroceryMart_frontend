@@ -70,7 +70,7 @@ const Deals = () => {
                 Welcome Back 👋
               </h2>
               <p className="text-gray-600 mb-6">
-                Check out today’s best deals curated for you.
+                Check out today’s best deals curated just for you.
               </p>
 
               <Link
